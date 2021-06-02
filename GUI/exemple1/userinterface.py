@@ -17,6 +17,7 @@ from FluorescenceWindow import MyFluorescenceBoxSizer
 from ImageWindow import MyImageBoxSizer
 from DatabaseWindow import MyDatabaseBoxSizer
 
+
 class ImageUI(wx.Frame):
     def __init__(self, parent, title):
         self.app = wx.App()
