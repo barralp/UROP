@@ -1,34 +1,20 @@
-## needs to be implemented into the user interface so that it displays with the rest of the data
+## Make it work in this file first, then add to the file with the rest of the displayconbgfvggggggggggggggggggvv           
+import sys 
 import wx
-## file that deals with all the aspects of the graph 
-from wx.lib.plot import PlotCanvas, PlotGraphics
+import wxmplot
+import numpy
 
-def PlotData() :
-    points = [] ## Will take 2d worth of points. For now will only plot BECHoldTime and nCount 
+class DataPlotting : 
 
-    return PlotGraphics("Title graph", "BECHoldTime", "nCount") ## eventually should figure out title switching depending on box that is selected
+    def axisLabel(data=None, selected=None, mask=None):
+        print()
+        app = wx.App()
 
-class DataGraph(wx.frame) :
-    def __init__(self) :
-        wx.frame.__init__(self, None, wx.ID_ANY, 'Data plotting tool')
-        ## Add panel to make formatting correct
-        panel = wx.Panel(self, wx.ID_ANY)
+    def dataParser() ## create an array of tuples 
+        return                                       
 
-        self.canvas = PlotCanvas(panel)
-        self.canvas.Draw()## figure out the points equivalent of bar graph
-        toggleGrid = wx.CheckBox(panel, label="Show Grid")
-        toggleGrid.Bind(wx.EVT_CHECKBOX, self.onToggleGrid)
-    def onToggleGrid(self, event) :
-        """"""
-        self.canvas.SetEnableGrid(event.IsChecked())
-    def selectVariables(self, widget, objects) :
-        """"""
-        for i in objects:
-            widget.Append(i.make, i)
-        widget.Bind(wx.EVT_COMBOBOX, self.varSwitch)
-    
-    def varSwitch(self, event) :
-        """"""
-    
-    def retrieveData() :
+    dataPlot = wxmplot.PlotPanel() ## based on documentation it looks like this is te correct class
+    dataPlot.scatterplot(x, y) ## x and y are an array of the values - take from sql file   
 
+    dataPlot.panel.lasso_callback = axisLabel
+    dataPlot.Show()
