@@ -17,7 +17,6 @@ from FluorescenceWindow import MyFluorescenceBoxSizer
 from ImageWindow import MyImageBoxSizer
 from DatabaseWindow import MyDatabaseBoxSizer
 
-
 class ImageUI(wx.Frame):
     def __init__(self, parent, title):
         self.app = wx.App()
@@ -200,12 +199,8 @@ class ImageUI(wx.Frame):
 
 
 if __name__ == '__main__':
-    print("here1")
     # app = wx.App()
-    print("here2")
     ui = ImageUI(None, title='Atom Image Analysis Dy v2')
-    print("here3")
     ui.setMagnification("3")
     ui.app.MainLoop()
-    print("here4")
 

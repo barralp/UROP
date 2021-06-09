@@ -65,6 +65,16 @@ def getNCount(imageID):
         nCount = 0.0
     return nCount
 
+def getTOF() :
+    sql_query = "SELECT TOF FROM ciceroOut ORDER BY imageID DESC LIMIT 1;"
+    TOF = executeGetQuery(sql_query)[0][0]
+    return TOF
+
+def getLoadCurrent() :
+    sql_query = "SELECT LoadCurrent FROM ciceroOut ORDER BY imageID DESC LIMIT 1;"
+    LoadCurrent = executeGetQuery(sql_query)[0][0]
+    return LoadCurrent
+
 def executeGetQuery(sql_query): # works when you don't need to use db.commit, so for read only functions
     db = setConnection()
     cursor = db.cursor()
