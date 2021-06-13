@@ -1,12 +1,15 @@
 import sys
 import wx
-import wxmplot
-import numpy
+import numpy as np
+import matplotlib.pyplot as plt
 from ipywidgets import interact, interactive, fixed, interact_manual
 import ipywidgets as widgets
 
 def f(x) :
     return x
+def g(y) :
+    return y
+
 class DataGraph(wx.Frame) :
     def __init__(self, parent):
         self.app = wx.App()
@@ -15,36 +18,60 @@ class DataGraph(wx.Frame) :
         # m_y = y
 
     def makeGraph(self) :
-        interact(f, x=['runID', 'IterationNum', 'IterationCount', 'RunningCounter',
-            'TOF', 'CompLevel', 'ImgFreq', 'dummy', 'IodineFreq', 'finalBField',
-            'CameraFudgeTime', 'LoadTime', 'CompTime', 'LoadCurrent', 'timestamp', 
-            'wee', 'MotLoadFreq', 'MotCompFreq', 'time', 'ZSPower', 'imageTime', 
-            'MOTLevel', 'compx', 'compy', 'LossTime', 'TCFreq', 'compz', 'MOTCurrent_Amps',
-            'MOTLoadCurrent_Amps', 'CompTime2', 'CompLevel2', 'MOTCompFreq2', 'FreqCompTime2',
-            'FinalYComp', 'CompHoldTime', 'WaitTime', 'ASPower', 'ASPower_mW', 'ASPower_mW_2', 
-            'level1', 'level2', 'level3', 'level3', 'level4', 'level5', 'freq1', 'freq2',
-            'freq3', 'freq4', 'freq5', 'ODT_Ramp', 'ODTHoldTime', 'ODT1_Final', 'ODT2_Final', 
-            'EvapTime2', 'EvapTime1', 'EvapTime3', 'BigZ', 'SGOn', 'SGOn2', 'PumpTime',
-            'DopplerCoolFreq', 'ODT1_Init', 'ODT1_Evap1_End', 'ODT2_Init', 'ODT2_Evap1_End',
-            'FeshbachCurrent', 'EvapTime4', 'AMFreq', 'AMDuration', 'ODTRampUp', 'Evap2Factor',
-            'tau', 'totalExp', 'InTrapCoolFreq', 'InTrapCoolTime', 'EvapTime5', 'Evap1_End_Gradient',
-            'Var60', 'EvapScan', 'Evap_Gradient_Init', 'Evap_Gradient1', 'Evap_Gradient2',
-            'Evap_Gradient3', 'Evap_End_Gradient', 'ODT_TOF_Gradient', 'ODT_TOF_BigZ', 
-            'Evap5_BigZ', 'FinalODT1', 'BlinckingTime', 'Blincking_Freq', 'Molasses_level',
-            'Blincking_duration', 'ODT_Molasses', 'ODT_Molasses_ZField', 'ODTLoad_MOT_Freq',
-            'ODTCompx', 'ODTCompy', 'ODTCompz', 'Blinckinglength', 'ODTLoad_MOTFreq', 
-            'Evap1_CompZ', 'Pumping_Freq', 'compx_Earth', 'compy_Earth', 'compz_Earth',
-            'EvapTime6', 'compz2'])
+        interact(f, x=['run ID', 'Iteration Num', 'Iteration Count', 'Running Counter',
+            'TOF', 'Comp Level', 'Img Freq', 'dummy', 'Iodine Freq', 'Final B Field',
+            'Camera Fudge Time', 'Load Time', 'Comp Time', 'Load Current', 'time stamp', 
+            'wee', 'Mot Load Freq', 'Mot Comp Freq', 'time', 'ZSPower', 'image Time', 
+            'MOT Level', 'comp x', 'comp y', 'Loss Time', 'TCFreq', 'compz', 'MOT Current Amps',
+            'MOT Load Current Amps', 'Comp Time 2', 'Comp Level 2', 'MOT Comp Freq 2', 'Freq Comp Time 2',
+            'Final Y Comp', 'Comp Hold Time', 'Wait Time', 'AS Power', 'AS Power mW', 'AS Power mW 2', 
+            'level 1', 'level 2', 'level 3', 'level 4', 'level 5', 'freq 1', 'freq 2',
+            'freq 3', 'freq 4', 'freq 5', 'ODT_Ramp', 'ODT Hold Time', 'ODT 1 Final', 'ODT 2 Final', 
+            'Evap Time 2', 'Evap Time 1', 'Evap Time 3', 'Big Z', 'SGOn', 'SGOn2', 'Pump Time',
+            'Doppler Cool Freq', 'ODT1_Init', 'ODT 1 Evap 1 End', 'ODT 2 Init', 'ODT 2 Evap 1 End',
+            'Feshbach Current', 'Evap Time 4', 'AM Freq', 'AM Duration', 'ODT Ramp Up', 'Evap 2 Factor',
+            'tau', 'total Exp', 'In Trap Cool Freq', 'In Trap Cool Time', 'Evap Time 5', 'Evap 1 End Gradient',
+            'Var60', 'Evap Scan', 'Evap_Gradient_Init', 'Evap Gradient 1', 'Evap Gradient 2',
+            'Evap Gradient 3', 'Evap End Gradient', 'ODT TOF Gradient', 'ODT TOF BigZ', 
+            'Evap 5 Big Z', 'Final ODT 1', 'Blincking Time', 'Blincking freq', 'Molasses level',
+            'Blincking duration', 'ODT Molasses', 'ODT Molasses Z Field', 'ODT Load MOT Freq',
+            'ODT Comp x', 'ODT Comp y', 'ODT Comp z', 'Blincking length', 'ODT Load MOT Freq', 
+            'Evap 1 Comp Z', 'Pumping Freq', 'comp x Earth', 'comp y Earth', 'comp z Earth',
+            'Evap Time 6', 'comp z 2'])
+        interact(g, y=['run ID', 'Iteration Num', 'Iteration Count', 'Running Counter', 
+            'TOF', 'Comp Level', 'Img Freq', 'dummy', 'Iodine Freq', 'Final B Field',
+            'Camera Fudge Time', 'Load Time', 'CompTime', 'Load Current', 'time stamp',
+            'wee', 'Mot Load Freq', 'Mot Comp Freq', 'time', 'ZSPower', 'image Time', 
+            'MOT Level', 'comp x', 'comp y', 'Loss Time', 'TCFreq', 'compz', 'MOT Current Amps',
+            'MOT Load Current Amps', 'Comp Time 2', 'Comp Level 2', 'MOT Comp Freq 2', 'Freq Comp Time 2',
+            'Final Y Comp', 'Comp Hold Time', 'Wait Time', 'AS Power', 'AS Power mW', 'AS Power mW 2',
+            'MOTCurrent2', 'level 1', 'level 2', 'level 3', 'level 4', 'level 5', 'freq 1', 'freq 2',
+            'freq 3', 'freq 4', 'freq 5', 'ODT Ramp', 'ODT Hold Time', 'ODT 1 Final', 'ODT 2 Final',
+            'Evap Time 2', 'Evap Time 1', 'Evap Time 3', 'Big Z', 'SGOn', 'SGOn2', 'PumpTime', 
+            'Doppler Cool Freq', 'ODT1_Init', 'ODT 1 Evap 1 End', 'ODT 2 Init', 'ODT 2 Evap 1 End',
+            'Feshbach Current', 'Evap Time 4', 'AM Freq', 'AM Duration', 'ODT Ramp Up', 'Evap 2 Factor',
+            'tau', 'total Exp', 'In Trap Cool Freq', 'In Trap Cool Time', 'Evap Time 5', 'Evap 1 End Gradient',
+            'Var 60', 'Evap Scan', 'Evap Gradient Init', 'Evap_Gradient1', 'Evap Gradient 2',
+            'Evap Gradient 3', 'Evap End Gradient', 'ODT TOF Gradient', 'ODT TOF Big Z', 
+            'Evap 5 Big Z', 'Final ODT 1', 'BlinckingTime', 'Blincking freq', 'Molasses level',
+            'Blincking duration', 'ODT Molasses', 'ODT Molasses Z Field', 'ODT Load MOT Freq',
+            'ODT comp x', 'ODT comp y', 'ODT comp z', 'Blincking length', 'ODT Load MOT Freq', 
+            'Evap 1 CompZ', 'Pumping freq', 'comp x Earth', 'comp y Earth', 'comp z Earth',
+            'Evap Time 6', 'comp z 2'])
+
         x1 = [0, 1, 2, 3]
         y1 = [0, 3, 4, 1]
         x2 = [0, 1, 2, 3]
         y2 = [5, 2, 3, 3]
 
-        varGraph = wxmplot.PlotPanel(self, (1750, 1600))
+        ##varGraph = wxmplot.interactive.PlotPanel(self, (1750, 1600))
         ## here have a series of ifs that will check the current variables selected
-        varGraph.scatterplot(x1, y1, title = 'x vs y graph', xLabel = 'x', yLabel = 'y')
-        varGraph.scatterplot(x2, y2, color = "red", edgecolor = "red")
 
+        plt.plot(x1, y1, 'o', color='black')
+        plt.xlabel("x variable")
+        plt.ylabel("Y Variable")
+        plt.title("X vs. Y Graph")
+        ##plt.scatterplot(x2, y2, color = "red", edgecolor = "red")
 
         self.Show()
 
