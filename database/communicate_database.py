@@ -15,8 +15,8 @@ from scipy.optimize import curve_fit
 
 MYSQLserverIP = "192.168.1.133"
 username = "root"
-password = "w0lfg4ng"
-databaseName = "dypoledatabase"
+password = "5buster13"
+databaseName = "DFLVXdq4$"
 
 #### Used functions ####
 # change here the selection global / local
@@ -31,8 +31,8 @@ def setConnection(typeOfConnection = 'local'):
 def setLocalConnection():
     # Open database connection
     mydb = mysql.connector.connect(host = "localhost",
-                        user = "student",
-                        password = "w0lfg4ng",
+                        user = "5buster13",
+                        password = "DFLVXdq4$",
                         database = "imagesdypoledatabase")
     #print('Local connection established')
     return mydb
@@ -84,11 +84,12 @@ def executeGetQuery(sql_query): # works when you don't need to use db.commit, so
     db.close()
     return cursorResult
 
-lastImageID = getLastImageID()
-lastRunID = getRunIDFromImageID(lastImageID)
-print(lastImageID)
-print(lastRunID)
-print(getNCount(lastImageID))
+#lastImageID = getLastImageID()
+#lastRunID = getRunIDFromImageID(lastImageID)
+setLocalConnection()
+#print(lastImageID)
+#print(lastRunID)
+#print(getNCount(lastImageID))
 
 #### Unused functions ####
 """
