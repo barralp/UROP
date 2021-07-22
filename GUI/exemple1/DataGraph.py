@@ -1,5 +1,5 @@
 import sys
-sys.path.append("../UROP/database")
+sys.path.insert(1, '../UROP/database')
 from database.communicate_database import getAMDuration, getAMFreq, getASPower, getASPowermW, getASPowermW2, getBigZ, getBlinckingDuration, getBlinckingFreq, getBlinckingLength, getBlinckingTime, getCameraFudgeTime, getCompHoldTime, getCompLevel, getCompLevel2, getCompTime, getCompTime2, getCompX, getCompXEarth, getCompY, getCompYEarth, getCompZ, getCompZ2, getCompZEarth, getDopplerCoolFreq, getDummy, getEvap1CompZ, getEvap1EndGradient, getEvap2Factor, getEvap5BigZ, getEvapEndGradient, getEvapGradient1, getEvapGradient2, getEvapGradient3, getEvapGradientInit, getEvapScan, getEvapTime1, getEvapTime2, getEvapTime3, getEvapTime4, getEvapTime5, getEvapTime6, getFeshbachCurrent, getFinalBField, getFinalODT1, getFinalYComp, getFreq1, getFreq2, getFreq3, getFreq4, getFreq5, getFreqCompTime2, getImageTime, getImgFreq, getInTrapCoolFreq, getInTrapCoolTime, getIodineFreq, getIterationCount, getIterationNum, getLevel1, getLevel2, getLevel3, getLevel4, getLevel5, getLoadCurrent, getLoadTime, getLossTime, getMOTCompFreq, getMOTCompFreq2, getMOTCurrentAmps, getMOTLevel, getMOTLoadCurrentAmps, getMolassesLevel, getMotLoadFreq, getODT1Evap1End, getODT1Final, getODT1Init, getODT2Evap1End, getODT2Final, getODT2Init, getODTCompX, getODTCompY, getODTCompZ, getODTHoldTime, getODTLoad_MOTFreq, getODTLoad_MOT_Freq, getODTMolasses, getODTMolassesZField, getODTRamp, getODTRampUp, getODTTOFBigZ, getODTTOFGradient, getPumpTime, getPumpingFreq, getRunID, getRunningCounter, getSGOn, getSGOn2, getTCFreq, getTOF, getTau, getTime, getTimeStamp, getTotalExp, getVar60, getWaitTime, getWee, getZSPower
 import wx
 import numpy as np
@@ -285,6 +285,18 @@ class DataGraph(wx.Frame) :
         widgets.ToggleButton(
             value=False,
             description='Legend On?',
+            disabled=False
+        )
+
+        widgets.ToggleButton(
+            value=False,
+            description='Export Graph',
+            disabled=False
+        )
+
+        widgets.ToggleButton(
+            value=False,
+            description='On/Off',
             disabled=False
         )
 
