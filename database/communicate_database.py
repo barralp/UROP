@@ -65,6 +65,11 @@ def getNCount(imageID):
         nCount = 0.0
     return nCount
 
+def getVariable(g) :
+    sql_query = "SELECT " + g + " FROM ciceroOut;"
+    variable = executeGetQuery(sql_query)[0]
+    return variable
+    
 def getRunID() :
     sql_query = "SELECT runID FROM ciceroOut;"
     runID = executeGetQuery(sql_query)[0]
@@ -617,7 +622,7 @@ def executeGetQuery(sql_query): # works when you don't need to use db.commit, so
 
 #lastImageID = getLastImageID()
 #lastRunID = getRunIDFromImageID(lastImageID)
-setLocalConnection()
+#setLocalConnection()
 #print(lastImageID)
 #print(lastRunID)
 #print(getNCount(lastImageID))
