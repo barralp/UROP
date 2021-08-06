@@ -26,7 +26,7 @@ class MyImageBoxSizer(wx.StaticBoxSizer):
         self.init_imageBox_imageInfo()
         self.init_imageBox_fittingResult()
         
-    def init_imageBox_imagePlot(self):
+    def init_imageBox_imagePlot(self): #Look here for graph example
     ######### images ##################
         self.figureImage = Figure(figsize = (8,8))
         gs = gridspec.GridSpec(2, 2, width_ratios=(7, 2), height_ratios=(7, 2), wspace = 0.05, hspace = 0.08)

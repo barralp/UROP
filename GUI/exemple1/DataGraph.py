@@ -6,19 +6,29 @@ import numpy as np
 import matplotlib.pyplot as plt
 from ipywidgets import interact, interactive, fixed, interact_manual
 import ipywidgets as widgets
+from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
+from matplotlib.figure import Figure
+import wx.lib.scrolledpanel
 
-class DataGraph(wx.Frame) :
-    def __init__(self, parent):
+class DataGraph(wx.StaticBoxSizer) :
+    def __init__(self, parent, label = 'Database'):
         self.app = wx.App()
-        super(DataGraph, self).__init__(parent, size=(450, 300))
+        databaseBox = wx.StaticBox(parent, label = label)
+        super(DataGraph, self).__init__(databaseBox, wx.VERTICAL)
+        self.panel = parent
+        self.init_databaseBox_databaseBox()
     
     def f(x) :
+        global varX
+        varX = x
         return x
 
     def g(y) :
+        global varY
+        varY = y
         return y
 
-    def ParseFile(self, selection) :
+    def parseFile(self, selection) :
         data = []
         if (selection == 'Run ID') :
             data = getRunID()
@@ -241,85 +251,91 @@ class DataGraph(wx.Frame) :
 
         
     def makeGraph(self) :
-        interact(self.f, x=['Run ID', 'Iteration Num', 'Iteration Count', 'Running Counter',
-            'TOF', 'Comp Level', 'Img Freq', 'Dummy', 'Iodine Freq', 'Final B Field',
-            'Camera Fudge Time', 'Load Time', 'Comp Time', 'Load Current', 'Time Stamp', 
-            'Wee', 'Mot Load Freq', 'Mot Comp Freq', 'Time', 'ZS Power', 'Image Time', 
-            'MOT Level', 'Comp X', 'Comp Y', 'Loss Time', 'TC Freq', 'Comp Z', 'MOT Current Amps',
-            'MOT Load Current Amps', 'Comp Time 2', 'Comp Level 2', 'MOT Comp Freq 2', 'Freq Comp Time 2',
-            'Final Y Comp', 'Comp Hold Time', 'Wait Time', 'AS Power', 'AS Power mW', 'AS Power mW 2', 
-            'Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5', 'Freq 1', 'Freq 2',
-            'Freq 3', 'Freq 4', 'Freq 5', 'ODT Ramp', 'ODT Hold Time', 'ODT 1 Final', 'ODT 2 Final', 
-            'Evap Time 2', 'Evap Time 1', 'Evap Time 3', 'Big Z', 'SG On', 'SG On 2', 'Pump Time',
-            'Doppler Cool Freq', 'ODT 1 Init', 'ODT 1 Evap 1 End', 'ODT 2 Init', 'ODT 2 Evap 1 End',
-            'Feshbach Current', 'Evap Time 4', 'AM Freq', 'AM Duration', 'ODT Ramp Up', 'Evap 2 Factor',
-            'Tau', 'Total Exp', 'In Trap Cool Freq', 'In Trap Cool Time', 'Evap Time 5', 'Evap 1 End Gradient',
-            'Var 60', 'Evap Scan', 'Evap Gradient Init', 'Evap Gradient 1', 'Evap Gradient 2',
-            'Evap Gradient 3', 'Evap End Gradient', 'ODT TOF Gradient', 'ODT TOF Big Z', 
-            'Evap 5 Big Z', 'Final ODT 1', 'Blincking Time', 'Blincking Freq', 'Molasses Level',
-            'Blincking Duration', 'ODT Molasses', 'ODT Molasses Z Field', 'ODT Load MOT Freq',
-            'ODT Comp X', 'ODT Comp Y', 'ODT Comp Z', 'Blincking Length', 'ODT Load MOT Freq', 
-            'Evap 1 Comp Z', 'Pumping Freq', 'Comp X Earth', 'Comp Y Earth', 'Comp Z Earth',
-            'Evap Time 6', 'Comp Z 2'])
-        interact(self.g, y=['Run ID', 'Iteration Num', 'Iteration Count', 'Running Counter', 
-            'TOF', 'Comp Level', 'Img Freq', 'Dummy', 'Iodine Freq', 'Final B Field',
-            'Camera Fudge Time', 'Load Time', 'Comp Time', 'Load Current', 'Time Stamp',
-            'Wee', 'Mot Load Freq', 'Mot Comp Freq', 'Time', 'ZS Power', 'Image Time', 
-            'MOT Level', 'Comp X', 'Comp Y', 'Loss Time', 'TC Freq', 'Comp Z', 'MOT Current Amps',
-            'MOT Load Current Amps', 'Comp Time 2', 'Comp Level 2', 'MOT Comp Freq 2', 'Freq Comp Time 2',
-            'Final Y Comp', 'Comp Hold Time', 'Wait Time', 'AS Power', 'AS Power mW', 'AS Power mW 2',
-            'MOT Current 2', 'Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5', 'Freq 1', 'Freq 2',
-            'Freq 3', 'Freq 4', 'Freq 5', 'ODT Ramp', 'ODT Hold Time', 'ODT 1 Final', 'ODT 2 Final',
-            'Evap Time 2', 'Evap Time 1', 'Evap Time 3', 'Big Z', 'SG On', 'SG On 2', 'Pump Time', 
-            'Doppler Cool Freq', 'ODT 1 Init', 'ODT 1 Evap 1 End', 'ODT 2 Init', 'ODT 2 Evap 1 End',
-            'Feshbach Current', 'Evap Time 4', 'AM Freq', 'AM Duration', 'ODT Ramp Up', 'Evap 2 Factor',
-            'Tau', 'Total Exp', 'In Trap Cool Freq', 'In Trap Cool Time', 'Evap Time 5', 'Evap 1 End Gradient',
-            'Var 60', 'Evap Scan', 'Evap Gradient Init', 'Evap Gradient 1', 'Evap Gradient 2',
-            'Evap Gradient 3', 'Evap End Gradient', 'ODT TOF Gradient', 'ODT TOF Big Z', 
-            'Evap 5 Big Z', 'Final ODT 1', 'Blincking Time', 'Blincking Freq', 'Molasses Level',
-            'Blincking Duration', 'ODT Molasses', 'ODT Molasses Z Field', 'ODT Load MOT Freq',
-            'ODT Comp X', 'ODT Comp Y', 'ODT Comp Z', 'Blincking Length', 'ODT Load MOT Freq', 
-            'Evap 1 Comp Z', 'Pumping Freq', 'Comp X Earth', 'Comp Y Earth', 'Comp Z Earth',
-            'Evap Time 6', 'Comp Z 2'])
+        # interact(self.f, x=['Run ID', 'Iteration Num', 'Iteration Count', 'Running Counter',
+        #     'TOF', 'Comp Level', 'Img Freq', 'Dummy', 'Iodine Freq', 'Final B Field',
+        #     'Camera Fudge Time', 'Load Time', 'Comp Time', 'Load Current', 'Time Stamp', 
+        #     'Wee', 'Mot Load Freq', 'Mot Comp Freq', 'Time', 'ZS Power', 'Image Time', 
+        #     'MOT Level', 'Comp X', 'Comp Y', 'Loss Time', 'TC Freq', 'Comp Z', 'MOT Current Amps',
+        #     'MOT Load Current Amps', 'Comp Time 2', 'Comp Level 2', 'MOT Comp Freq 2', 'Freq Comp Time 2',
+        #     'Final Y Comp', 'Comp Hold Time', 'Wait Time', 'AS Power', 'AS Power mW', 'AS Power mW 2', 
+        #     'Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5', 'Freq 1', 'Freq 2',
+        #     'Freq 3', 'Freq 4', 'Freq 5', 'ODT Ramp', 'ODT Hold Time', 'ODT 1 Final', 'ODT 2 Final', 
+        #     'Evap Time 2', 'Evap Time 1', 'Evap Time 3', 'Big Z', 'SG On', 'SG On 2', 'Pump Time',
+        #     'Doppler Cool Freq', 'ODT 1 Init', 'ODT 1 Evap 1 End', 'ODT 2 Init', 'ODT 2 Evap 1 End',
+        #     'Feshbach Current', 'Evap Time 4', 'AM Freq', 'AM Duration', 'ODT Ramp Up', 'Evap 2 Factor',
+        #     'Tau', 'Total Exp', 'In Trap Cool Freq', 'In Trap Cool Time', 'Evap Time 5', 'Evap 1 End Gradient',
+        #     'Var 60', 'Evap Scan', 'Evap Gradient Init', 'Evap Gradient 1', 'Evap Gradient 2',
+        #     'Evap Gradient 3', 'Evap End Gradient', 'ODT TOF Gradient', 'ODT TOF Big Z', 
+        #     'Evap 5 Big Z', 'Final ODT 1', 'Blincking Time', 'Blincking Freq', 'Molasses Level',
+        #     'Blincking Duration', 'ODT Molasses', 'ODT Molasses Z Field', 'ODT Load MOT Freq',
+        #     'ODT Comp X', 'ODT Comp Y', 'ODT Comp Z', 'Blincking Length', 'ODT Load MOT Freq', 
+        #     'Evap 1 Comp Z', 'Pumping Freq', 'Comp X Earth', 'Comp Y Earth', 'Comp Z Earth',
+        #     'Evap Time 6', 'Comp Z 2'])
+        # interact(self.g, y=['Run ID', 'Iteration Num', 'Iteration Count', 'Running Counter', 
+        #     'TOF', 'Comp Level', 'Img Freq', 'Dummy', 'Iodine Freq', 'Final B Field',
+        #     'Camera Fudge Time', 'Load Time', 'Comp Time', 'Load Current', 'Time Stamp',
+        #     'Wee', 'Mot Load Freq', 'Mot Comp Freq', 'Time', 'ZS Power', 'Image Time', 
+        #     'MOT Level', 'Comp X', 'Comp Y', 'Loss Time', 'TC Freq', 'Comp Z', 'MOT Current Amps',
+        #     'MOT Load Current Amps', 'Comp Time 2', 'Comp Level 2', 'MOT Comp Freq 2', 'Freq Comp Time 2',
+        #     'Final Y Comp', 'Comp Hold Time', 'Wait Time', 'AS Power', 'AS Power mW', 'AS Power mW 2',
+        #     'MOT Current 2', 'Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5', 'Freq 1', 'Freq 2',
+        #     'Freq 3', 'Freq 4', 'Freq 5', 'ODT Ramp', 'ODT Hold Time', 'ODT 1 Final', 'ODT 2 Final',
+        #     'Evap Time 2', 'Evap Time 1', 'Evap Time 3', 'Big Z', 'SG On', 'SG On 2', 'Pump Time', 
+        #     'Doppler Cool Freq', 'ODT 1 Init', 'ODT 1 Evap 1 End', 'ODT 2 Init', 'ODT 2 Evap 1 End',
+        #     'Feshbach Current', 'Evap Time 4', 'AM Freq', 'AM Duration', 'ODT Ramp Up', 'Evap 2 Factor',
+        #     'Tau', 'Total Exp', 'In Trap Cool Freq', 'In Trap Cool Time', 'Evap Time 5', 'Evap 1 End Gradient',
+        #     'Var 60', 'Evap Scan', 'Evap Gradient Init', 'Evap Gradient 1', 'Evap Gradient 2',
+        #     'Evap Gradient 3', 'Evap End Gradient', 'ODT TOF Gradient', 'ODT TOF Big Z', 
+        #     'Evap 5 Big Z', 'Final ODT 1', 'Blincking Time', 'Blincking Freq', 'Molasses Level',
+        #     'Blincking Duration', 'ODT Molasses', 'ODT Molasses Z Field', 'ODT Load MOT Freq',
+        #     'ODT Comp X', 'ODT Comp Y', 'ODT Comp Z', 'Blincking Length', 'ODT Load MOT Freq', 
+        #     'Evap 1 Comp Z', 'Pumping Freq', 'Comp X Earth', 'Comp Y Earth', 'Comp Z Earth',
+        #     'Evap Time 6', 'Comp Z 2'])
+        # widgets.ToggleButton(
+        #     value=False,
+        #     description='Legend On?',
+        #     disabled=False
+        # )
 
-        widgets.ToggleButton(
-            value=False,
-            description='Legend On?',
-            disabled=False
-        )
+        # widgets.ToggleButton(
+        #     value=False,
+        #     description='Export Graph',
+        #     disabled=False
+        # )
 
-        widgets.ToggleButton(
-            value=False,
-            description='Export Graph',
-            disabled=False
-        )
+        # widgets.ToggleButton(
+        #     value=False,
+        #     description='On/Off',
+        #     disabled=False
+        # )
 
-        widgets.ToggleButton(
-            value=False,
-            description='On/Off',
-            disabled=False
-        )
+        # xSelection = varY
+        # ySelection = varX
 
-        xSelection = self.f
-        ySelection = self.g
-
-        x1 = self.ParseFile(xSelection)
-        y1 = self.ParseFile(ySelection)
-        print(self.ParseFile(xSelection))
-        print(self.ParseFile(ySelection))
+        # x1 = self.parseFile(xSelection)
+        # y1 = self.parseFile(ySelection)
+        # print(self.parseFile(xSelection))
+        # print(self.parseFile(ySelection))
 
         ##varGraph = wxmplot.interactive.PlotPanel(self, (1750, 1600))
         ## here have a series of ifs that will check the current variables selected
 
-        plt.plot(x1, y1, 'o', color ='black')
-        plt.xlabel(xSelection)
-        plt.ylabel(ySelection)
+        # plt.plot(x1, y1, 'o', color ='black')
+        # plt.xlabel(xSelection)
+        # plt.ylabel(ySelection)
         #plt.title(xSelection + ' vs. ' + ySelection + " Graph")
         ##plt.plot(x2, y2, 'o', color = "red")
-
+        self.panel = wx.lib.scrolledpanel.ScrolledPanel(self, id = -1, size = (1,1))
+        self.figureImage = Figure(figsize = (8,8))
+        self.axes1 = self.figureImage.add_subplot(111)
+        self.canvasImage = FigureCanvas(self.panel, -1, self.figureImage)
+        self.Add(self.canvasImage, flag=wx.ALL|wx.SHAPED, border=5)
+        self.axes1.plot([0, 1, 2], [0, 1, 4])
+        self.canvasImage.draw()
         self.Show()
 
 if __name__ == '__main__':
-    graph = DataGraph(None)
+    parent = wx.StaticBoxSizer()
+    graph = DataGraph(None, parent)
     graph.makeGraph()
     graph.app.MainLoop()
