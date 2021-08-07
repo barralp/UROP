@@ -11,11 +11,10 @@ from matplotlib.figure import Figure
 import wx.lib.scrolledpanel
 
 class DataGraph(wx.StaticBoxSizer) :
-    def __init__(self, parent, label = 'Database'):
+    def __init__(self, label = 'Database'):
         self.app = wx.App()
-        databaseBox = wx.StaticBox(parent, label = label)
+        databaseBox = wx.StaticBox(label = label)
         super(DataGraph, self).__init__(databaseBox, wx.VERTICAL)
-        self.panel = parent
         self.init_databaseBox_databaseBox()
     
     def f(x) :
@@ -335,7 +334,6 @@ class DataGraph(wx.StaticBoxSizer) :
         self.Show()
 
 if __name__ == '__main__':
-    parent = wx.StaticBoxSizer()
-    graph = DataGraph(None, parent)
+    graph = DataGraph(None)
     graph.makeGraph()
     graph.app.MainLoop()
