@@ -11,7 +11,7 @@ from matplotlib.figure import Figure
 import wx.lib.scrolledpanel
 
 class DataGraph(wx.StaticBoxSizer) :
-    def __init__(self, label = 'Database'):
+    def __init__(self, parent, label = 'Database'):
         self.app = wx.App()
         databaseBox = wx.StaticBox(label = label)
         super(DataGraph, self).__init__(databaseBox, wx.VERTICAL)
