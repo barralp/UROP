@@ -21,9 +21,8 @@ class PlotPanel( wx.Panel ) :
         self.axes.grid(True, color="gray")
         self.axes.set_xbound( (0,5) )
         self.axes.set_ybound( (3,80) )
-        self.axes.set_xlabel( "x var" ) ## change later
-        self.axes.set_ylabel( "y var" )
-        self.axes = self.figure.add_subplot(111)
+        self.axes.set_xlabel( "X Var" ) ## change later
+        self.axes.set_ylabel( "Y Var" )
         self.axes.grid(True, color="gray")
         self._SetSize()
         self.Bind( wx.EVT_SIZE, self._SetSize )
@@ -39,7 +38,7 @@ class PlotPanel( wx.Panel ) :
         self.figure.set_size_inches( float( pixels[0] ) / dpi,float( pixels[1] ) / dpi )
     #------------------------------------------------------------------------------------
 
-    def changeVar(self, selection, var) :
+    def changeVar(self, selection) :
         data = []
         if (selection == 'Run ID') :
             data = getRunID()
@@ -258,10 +257,6 @@ class PlotPanel( wx.Panel ) :
         else :
             data = []
             print('no matching')
-        if (var == "x") :
-            self.axes.set_xlabel(selection)
-        else :
-            self.axes.set_ylabel(selection)
         return data
 
 class MainWindow(wx.Frame):
@@ -298,8 +293,8 @@ class MainWindow(wx.Frame):
         self.dropDownYRelations = wx.ComboBox(self, choices = relationsY, pos = (300, 400))
         selectionX = self.dropDownX
         selectionY = self.dropDownY
-        self.dropDownX.Bind(wx.EVT_BUTTON, self.updateDropDown)
-        self.dropDownY.Bind(wx.EVT_BUTTON, self.updateDropDown)
+        self.dropDownX.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
+        self.dropDownY.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
         #self.spin = wx.SpinCtrl(self.panel)
         #self.button = wx.Button(self.panel, label="Update")
         #self.stop   = wx.Button(self.panel, label="Stop")
@@ -310,7 +305,7 @@ class MainWindow(wx.Frame):
         self.graph = PlotPanel( self, position=(20, 50), xVar=selectionX.GetStringSelection(), 
             yVar=selectionY.GetStringSelection() )
         self.panel.SetSizerAndFit(self.sizer)
-        self.updateDropDown()
+        self.updateDropDown(0)
         self.Show()
 
         # Use EVT_CHAR_HOOK on Frame insted of wx.EVT_KEY_UP on SpinCtrl
@@ -319,18 +314,22 @@ class MainWindow(wx.Frame):
         #self.button.Bind(wx.EVT_BUTTON, self.OnUpdate)
         #self.stop.Bind(wx.EVT_BUTTON, self.OnStop)
 
-    def updateDropDown(self) :         
+    def updateDropDown(self, event) :       
         self.graph.axes.set_title(self.dropDownX.GetStringSelection()
             + " vs. " + self.dropDownY.GetStringSelection()) 
         self.graph.axes.set_xlabel(self.dropDownX.GetStringSelection()) ## change later
         self.graph.axes.set_ylabel(self.dropDownY.GetStringSelection())
+        #self.graph.axes.set_x(self.graph.changeVar(self.dropDownX.GetStringSelection()))
+        #self.graph.axes.set_y(self.graph.changeVar(self.dropDownY.GetStringSelection()))
+        self.graph.axes.plot(self.graph.changeVar(self.dropDownX.GetStringSelection()),
+            self.graph.changeVar(self.dropDownY.GetStringSelection()))
         self.graph.canvas.draw()
-
+        print(getAMDuration())
+        print(getAMFreq())
 
 
 
 
 app = wx.App(False)
-while(True) :
-    win = MainWindow(None)
-    app.MainLoop()
+win = MainWindow(None)
+app.MainLoop()
