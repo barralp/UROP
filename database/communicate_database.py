@@ -30,10 +30,13 @@ def setConnection(typeOfConnection = 'local'):
 
 def setLocalConnection():
     # Open database connection
-    mydb = mysql.connector.connect(host = "localhost",
-                        user = "root",
-                        password = "DFLVXdq4$",
-                        database = "imagesdypoledatabase")
+    mydb = mysql.connector.connection.MySQLConnection(host = 
+        'localhost', user = 'root', password = 'DFLVXdq4$',
+        database = 'imagesdypoledatabase')
+    #mydb = mysql.connector.connect(host = 'localhost',
+     #                   user = 'root',
+      #                  password = 'DFLVXdq4$',
+       #                 database = 'imagesdypoledatabase')
     #print('Local connection established')
     return mydb
 
@@ -72,7 +75,7 @@ def getVariable(g) :
     
 def getRunID() :
     sql_query = "SELECT runID FROM ciceroOut;"
-    runID = executeGetQuery(sql_query)[0]
+    runID = executeGetQuery(sql_query)
     return runID
 
 def getIterationNum() :
