@@ -1,6 +1,6 @@
 import sys
 sys.path.insert(0, '../../database')
-from communicate_database import getAMDuration, getAMFreq, getASPower, getASPowermW, getASPowermW2, getBigZ, getBlinckingDuration, getBlinckingFreq, getBlinckingLength, getBlinckingTime, getCameraFudgeTime, getCompHoldTime, getCompLevel, getCompLevel2, getCompTime, getCompTime2, getCompX, getCompXEarth, getCompY, getCompYEarth, getCompZ, getCompZ2, getCompZEarth, getDopplerCoolFreq, getDummy, getEvap1CompZ, getEvap1EndGradient, getEvap2Factor, getEvap5BigZ, getEvapEndGradient, getEvapGradient1, getEvapGradient2, getEvapGradient3, getEvapGradientInit, getEvapScan, getEvapTime1, getEvapTime2, getEvapTime3, getEvapTime4, getEvapTime5, getEvapTime6, getFeshbachCurrent, getFinalBField, getFinalODT1, getFinalYComp, getFreq1, getFreq2, getFreq3, getFreq4, getFreq5, getFreqCompTime2, getImageTime, getImgFreq, getInTrapCoolFreq, getInTrapCoolTime, getIodineFreq, getIterationCount, getIterationNum, getLevel1, getLevel2, getLevel3, getLevel4, getLevel5, getLoadCurrent, getLoadTime, getLossTime, getMOTCompFreq, getMOTCompFreq2, getMOTCurrentAmps, getMOTLevel, getMOTLoadCurrentAmps, getMolassesLevel, getMotLoadFreq, getODT1Evap1End, getODT1Final, getODT1Init, getODT2Evap1End, getODT2Final, getODT2Init, getODTCompX, getODTCompY, getODTCompZ, getODTHoldTime, getODTLoad_MOTFreq, getODTLoad_MOT_Freq, getODTMolasses, getODTMolassesZField, getODTRamp, getODTRampUp, getODTTOFBigZ, getODTTOFGradient, getPumpTime, getPumpingFreq, getRunID, getRunningCounter, getSGOn, getSGOn2, getTCFreq, getTOF, getTau, getTime, getTimeStamp, getTotalExp, getVar60, getWaitTime, getWee, getZSPower
+from communicate_database import getEntireColumn, getAMDuration, getAMFreq, getASPower, getASPowermW, getASPowermW2, getBigZ, getBlinckingDuration, getBlinckingFreq, getBlinckingLength, getBlinckingTime, getCameraFudgeTime, getCompHoldTime, getCompLevel, getCompLevel2, getCompTime, getCompTime2, getCompX, getCompXEarth, getCompY, getCompYEarth, getCompZ, getCompZ2, getCompZEarth, getDopplerCoolFreq, getDummy, getEvap1CompZ, getEvap1EndGradient, getEvap2Factor, getEvap5BigZ, getEvapEndGradient, getEvapGradient1, getEvapGradient2, getEvapGradient3, getEvapGradientInit, getEvapScan, getEvapTime1, getEvapTime2, getEvapTime3, getEvapTime4, getEvapTime5, getEvapTime6, getFeshbachCurrent, getFinalBField, getFinalODT1, getFinalYComp, getFreq1, getFreq2, getFreq3, getFreq4, getFreq5, getFreqCompTime2, getImageTime, getImgFreq, getInTrapCoolFreq, getInTrapCoolTime, getIodineFreq, getIterationCount, getIterationNum, getLevel1, getLevel2, getLevel3, getLevel4, getLevel5, getLoadCurrent, getLoadTime, getLossTime, getMOTCompFreq, getMOTCompFreq2, getMOTCurrentAmps, getMOTLevel, getMOTLoadCurrentAmps, getMolassesLevel, getMotLoadFreq, getODT1Evap1End, getODT1Final, getODT1Init, getODT2Evap1End, getODT2Final, getODT2Init, getODTCompX, getODTCompY, getODTCompZ, getODTHoldTime, getODTLoad_MOTFreq, getODTLoad_MOT_Freq, getODTMolasses, getODTMolassesZField, getODTRamp, getODTRampUp, getODTTOFBigZ, getODTTOFGradient, getPumpTime, getPumpingFreq, getRunID, getRunningCounter, getSGOn, getSGOn2, getTCFreq, getTOF, getTau, getTime, getTimeStamp, getTotalExp, getVar60, getWaitTime, getWee, getZSPower
 import matplotlib
 import numpy
 import wx
@@ -40,6 +40,7 @@ class PlotPanel( wx.Panel ) :
 
     def changeVar(self, selection) :
         data = []
+        data = getEntireColumn(selection, 'ciceroOut')
         if (selection == 'Run ID') :
             data = getRunID()
         elif (selection == 'Iteration Num') :
@@ -261,7 +262,7 @@ class PlotPanel( wx.Panel ) :
 
 def returnFuncVar(self) :
     return 0
-    
+
 class MainWindow(wx.Frame):
     def __init__(self, parent):
         self.app = wx.App()
@@ -299,17 +300,14 @@ class MainWindow(wx.Frame):
         self.dropDownX.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
         self.dropDownY.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
         #self.spin = wx.SpinCtrl(self.panel)
-        #self.button = wx.Button(self.panel, label="Update")
-        #self.stop   = wx.Button(self.panel, label="Stop")
+        #self.button = wx.Button(self, label="Update Data", pos=[600, 600])
+        #self.export   = wx.Button(self, label="Stop")
         self.panel = wx.Panel(self)
         self.sizer = wx.BoxSizer()
         #self.sizer.Add(self.button)
         #self.sizer.Add(self.stop)
-        if selectionX.GetStringSelection() != "" and selectionY.GetStringSelection() != "":
-            self.graph = PlotPanel( self, position=(20, 50), xVar=selectionX.GetStringSelection(), 
-                yVar=selectionY.GetStringSelection() )
-        else:
-            self.graph = PlotPanel( self, position=(20, 50), xVar=[], yVar=[])
+        self.graph = PlotPanel( self, position=(20, 50), xVar=selectionX.GetStringSelection(), 
+            yVar=selectionY.GetStringSelection())
         self.panel.SetSizerAndFit(self.sizer)
         self.updateDropDown(0)
         self.Show()
@@ -320,15 +318,20 @@ class MainWindow(wx.Frame):
         #self.button.Bind(wx.EVT_BUTTON, self.OnUpdate)
         #self.stop.Bind(wx.EVT_BUTTON, self.OnStop)
 
-    def updateDropDown(self, event) :       
+    def updateDropDown(self, event) :
+        self.graph.axes.cla()       
         self.graph.axes.set_title(self.dropDownX.GetStringSelection()
             + " vs. " + self.dropDownY.GetStringSelection()) 
         self.graph.axes.set_xlabel(self.dropDownX.GetStringSelection()) ## change later
         self.graph.axes.set_ylabel(self.dropDownY.GetStringSelection())
         #self.graph.axes.set_x(self.graph.changeVar(self.dropDownX.GetStringSelection()))
         #self.graph.axes.set_y(self.graph.changeVar(self.dropDownY.GetStringSelection()))
-        self.graph.axes.plot(self.graph.changeVar(self.dropDownX.GetStringSelection()),
-            self.graph.changeVar(self.dropDownY.GetStringSelection()))
+        if self.dropDownY.GetStringSelection() != "" and self.dropDownY.GetStringSelection() != "":
+            self.graph.axes.plot(self.graph.changeVar(self.dropDownX.GetStringSelection()),
+               self.graph.changeVar(self.dropDownY.GetStringSelection()), marker ='o', ls = '')
+            self.graph.axes.plot([],[])
+        else :
+            self.graph.axes.plot([],[])
         self.graph.canvas.draw()
         print(getAMDuration())
         print(getAMFreq())
