@@ -41,37 +41,37 @@ class PlotPanel( wx.Panel ) :
     def changeVar(self, selection) :
         data = []
         data = getEntireColumn(selection, 'ciceroOut')
-        if (selection == 'Run ID') :
+        if (selection == 'RunID') :
             data = getRunID()
-        elif (selection == 'Iteration Num') :
+        elif (selection == 'IterationNum') :
             data = getIterationNum()
-        elif (selection == 'Iteration Count') :
+        elif (selection == 'IterationCount') :
             data = getIterationCount()
-        elif (selection == 'Running Counter') :
+        elif (selection == 'RunningCounter') :
             data = getRunningCounter()
         elif (selection == 'TOF') :
             data = getTOF()
-        elif (selection == 'Comp Level') :
+        elif (selection == 'CompLevel') :
             data = getCompLevel()
-        elif (selection == 'Img Freq') :
+        elif (selection == 'ImgFreq') :
             data = getImgFreq()
-        elif (selection == 'Dummy') :
+        elif (selection == 'dummy') :
             data = getDummy()
-        elif (selection == 'Iodine Freq') :
+        elif (selection == 'IodineFreq') :
             data = getIodineFreq()
-        elif (selection == 'Final B Field') :
+        elif (selection == 'FinalBField') :
             data = getFinalBField()
-        elif (selection == 'Camera Fudge Time') :
+        elif (selection == 'CameraFudgeTime') :
             data = getCameraFudgeTime()
-        elif (selection == 'Load Time') :
+        elif (selection == 'LoadTime') :
             data = getLoadTime()
-        elif (selection == 'Comp Time') :
+        elif (selection == 'CompTime') :
             data = getCompTime()
-        elif (selection == 'Load Current') :
+        elif (selection == 'LoadCurrent') :
             data = getLoadCurrent()
-        elif (selection == 'Time Stamp') :
+        elif (selection == 'timestamp') :
             data = getTimeStamp()
-        elif (selection == 'Wee') :
+        elif (selection == 'wee') :
             data = getWee()
         elif (selection == 'Mot Load Freq') :
             data = getMotLoadFreq()
@@ -267,26 +267,26 @@ class MainWindow(wx.Frame):
     def __init__(self, parent):
         self.app = wx.App()
         wx.Frame.__init__(self, parent, title="Database Variable Graphing", size=(1000,600))
-        variables = ['Run ID', 'Iteration Num', 'Iteration Count', 'Running Counter', 
-            'TOF', 'Comp Level', 'Img Freq', 'Dummy', 'Iodine Freq', 'Final B Field',
-            'Camera Fudge Time', 'Load Time', 'Comp Time', 'Load Current', 'Time Stamp',
-            'Wee', 'Mot Load Freq', 'Mot Comp Freq', 'Time', 'ZS Power', 'Image Time', 
-            'MOT Level', 'Comp X', 'Comp Y', 'Loss Time', 'TC Freq', 'Comp Z', 'MOT Current Amps',
-            'MOT Load Current Amps', 'Comp Time 2', 'Comp Level 2', 'MOT Comp Freq 2', 'Freq Comp Time 2',
-            'Final Y Comp', 'Comp Hold Time', 'Wait Time', 'AS Power', 'AS Power mW', 'AS Power mW 2',
-            'MOT Current 2', 'Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5', 'Freq 1', 'Freq 2',
-            'Freq 3', 'Freq 4', 'Freq 5', 'ODT Ramp', 'ODT Hold Time', 'ODT 1 Final', 'ODT 2 Final',
-            'Evap Time 2', 'Evap Time 1', 'Evap Time 3', 'Big Z', 'SG On', 'SG On 2', 'Pump Time', 
-            'Doppler Cool Freq', 'ODT 1 Init', 'ODT 1 Evap 1 End', 'ODT 2 Init', 'ODT 2 Evap 1 End',
-            'Feshbach Current', 'Evap Time 4', 'AM Freq', 'AM Duration', 'ODT Ramp Up', 'Evap 2 Factor',
-            'Tau', 'Total Exp', 'In Trap Cool Freq', 'In Trap Cool Time', 'Evap Time 5', 'Evap 1 End Gradient',
-            'Var 60', 'Evap Scan', 'Evap Gradient Init', 'Evap Gradient 1', 'Evap Gradient 2',
-            'Evap Gradient 3', 'Evap End Gradient', 'ODT TOF Gradient', 'ODT TOF Big Z', 
-            'Evap 5 Big Z', 'Final ODT 1', 'Blincking Time', 'Blincking Freq', 'Molasses Level',
-            'Blincking Duration', 'ODT Molasses', 'ODT Molasses Z Field', 'ODT Load MOT Freq',
-            'ODT Comp X', 'ODT Comp Y', 'ODT Comp Z', 'Blincking Length', 'ODT Load MOT Freq', 
-            'Evap 1 Comp Z', 'Pumping Freq', 'Comp X Earth', 'Comp Y Earth', 'Comp Z Earth',
-            'Evap Time 6', 'Comp Z 2']
+        variables = ['runID', 'IterationNum', 'IterationCount', 'RunningCounter', 
+            'TOF', 'CompLevel', 'ImgFreq', 'dummy', 'IodineFreq', 'FinalBField',
+            'CameraFudgeTime', 'LoadTime', 'CompTime', 'LoadCurrent', 'timestamp',
+            'wee', 'MotLoadFreq', 'MotCompFreq', 'time', 'ZSPower', 'imageTime', 
+            'MOTLevel', 'compx', 'compy', 'LossTime', 'TCFreq', 'compz', 'MOTCurrent_Amps',
+            'MOTLoadCurrent_Amps', 'CompTime2', 'CompLevel2', 'MOTCompFreq2', 'FreqCompTime2',
+            'FinalYComp', 'CompHoldTime', 'WaitTime', 'ASPower', 'ASPower_mW', 'ASPower_mW_2',
+            'MOTCurrent2', 'level1', 'level2', 'level3', 'level4', 'level5', 'freq1', 'freq2',
+            'freq3', 'freq4', 'freq5', 'ODT_Ramp', 'ODTHoldTime', 'ODT1_Final', 'ODT2_Final',
+            'EvapTime2', 'EvapTime1', 'EvapTime3', 'BigZ', 'SGOn', 'SGOn2', 'PumpTime', 
+            'DopplerCoolFreq', 'ODT1_Init', 'ODT1_Evap1_End', 'ODT2_Init', 'ODT2_Evap1_End',
+            'FeshbachCurrent', 'EvapTime4', 'AMFreq', 'AMDuration', 'ODTRampUp', 'Evap2Factor',
+            'tau', 'totalExp', 'InTrapCoolFreq', 'InTrapCoolTime', 'EvapTime5', 'Evap1_End_Gradient',
+            'Var60', 'EvapScan', 'EvapGradientInit', 'Evap_Gradient1', 'Evap_Gradient2',
+            'Evap_Gradient3', 'Evap_End_Gradient', 'ODT_TOF_Gradient', 'ODT_TOF_BigZ', 
+            'Evap5_BigZ', 'FinalODT1', 'BlinckingTime', 'Blincking_freq', 'Molasses_level',
+            'Blincking_duration', 'ODT_Molasses', 'ODT_Molasses_ZField', 'ODTLoad_MOT_Freq',
+            'ODTcompx', 'ODTcompy', 'ODTcompz', 'Blinckinglength', 'ODTLoad_MOTFreq', 
+            'Evap1_CompZ', 'Pumping_Freq', 'compx_Earth', 'compy_Earth', 'compz_Earth',
+            'EvapTime6', 'compz2']
         relationsX = ["x", "log(x)", "x^2", "x^0.5"]
         relationsY = ["y", "log(y)", "y^2", "y^0.5"]
         self.textX = wx.StaticText(self, label = "X Variable", pos = (20, 380))
