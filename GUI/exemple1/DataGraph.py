@@ -85,13 +85,10 @@ class MainWindow(wx.Frame):
         selectionY = self.dropDownY
         self.dropDownX.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
         self.dropDownY.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
-        #self.spin = wx.SpinCtrl(self.panel)
-        #self.button = wx.Button(self, label="Update Data", pos=[600, 600])
+        self.button = wx.Button(self, label="Update Data", pos=[10, 435])
         #self.export   = wx.Button(self, label="Stop")
         self.panel = wx.Panel(self)
         self.sizer = wx.BoxSizer()
-        #self.sizer.Add(self.button)
-        #self.sizer.Add(self.stop)
         self.graph = PlotPanel( self, position=(20, 50), xVar=selectionX.GetStringSelection(), 
             yVar=selectionY.GetStringSelection())
         self.panel.SetSizerAndFit(self.sizer)
@@ -110,8 +107,6 @@ class MainWindow(wx.Frame):
             + " vs. " + self.dropDownY.GetStringSelection()) 
         self.graph.axes.set_xlabel(self.dropDownX.GetStringSelection()) ## change later
         self.graph.axes.set_ylabel(self.dropDownY.GetStringSelection())
-        #self.graph.axes.set_x(self.graph.changeVar(self.dropDownX.GetStringSelection()))
-        #self.graph.axes.set_y(self.graph.changeVar(self.dropDownY.GetStringSelection()))
         if self.dropDownY.GetStringSelection() != "" and self.dropDownY.GetStringSelection() != "":
             self.graph.axes.plot(self.graph.changeVar(self.dropDownX.GetStringSelection()),
                self.graph.changeVar(self.dropDownY.GetStringSelection()), marker ='o', ls = '')
