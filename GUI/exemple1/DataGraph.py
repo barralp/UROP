@@ -5,6 +5,8 @@ import matplotlib
 import numpy
 import wx
 import numpy as np
+import pandas as pd
+
 matplotlib.use('WXAgg')
 
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
@@ -79,13 +81,16 @@ class MainWindow(wx.Frame):
         self.textY = wx.StaticText(self, label = "Y Variable", pos = (20, 405))  
         self.dropDownX = wx.ComboBox(self, choices = variables, pos = (80, 375))
         self.dropDownY = wx.ComboBox(self, choices = variables, pos = (80, 400))
-        self.dropDownXRelations = wx.ComboBox(self, choices = relationsX, pos = (300, 375))
-        self.dropDownYRelations = wx.ComboBox(self, choices = relationsY, pos = (300, 400))
+        self.textXRelations = wx.StaticText(self, label = "X Transformation", pos = (250, 380))
+        self.textYRelations = wx.StaticText(self, label = "Y Transformation", pos = (250, 405))
+        self.dropDownXRelations = wx.ComboBox(self, choices = relationsX, pos = (350, 375))
+        self.dropDownYRelations = wx.ComboBox(self, choices = relationsY, pos = (350, 400))
         selectionX = self.dropDownX
         selectionY = self.dropDownY
         self.dropDownX.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
         self.dropDownY.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
-        self.button = wx.Button(self, label="Update Data", pos=[10, 435])
+        self.updateButton = wx.Button(self, label="Update Data", pos=[10, 435])
+        self.exportDataButton = wx.Button(self, label="Export Data", pos=[100, 435])
         #self.export   = wx.Button(self, label="Stop")
         self.panel = wx.Panel(self)
         self.sizer = wx.BoxSizer()
@@ -93,13 +98,8 @@ class MainWindow(wx.Frame):
             yVar=selectionY.GetStringSelection())
         self.panel.SetSizerAndFit(self.sizer)
         self.updateDropDown(0)
+        self.saveToCSV()
         self.Show()
-
-        # Use EVT_CHAR_HOOK on Frame insted of wx.EVT_KEY_UP on SpinCtrl
-        # to disable "on Enter go to next widget" functionality
-        #self.Bind(wx.EVT_CHAR_HOOK, self.OnKey) 
-        #self.button.Bind(wx.EVT_BUTTON, self.OnUpdate)
-        #self.stop.Bind(wx.EVT_BUTTON, self.OnStop)
 
     def updateDropDown(self, event) :
         self.graph.axes.cla()       
@@ -114,6 +114,24 @@ class MainWindow(wx.Frame):
         else :
             self.graph.axes.plot([],[])
         self.graph.canvas.draw()
+    
+    def applyTransformation(self) : # use for plotting different 
+        xChoice = self.dropDownXRelations.GetStringSelection()
+        yChoice = self.dropDownYRelations.GetStringSelection()
+        #if (xChoice != '' & 'x') :
+        
+        #if (yChoice != '' & 'y') :
+            #if (yChoice == 'log(y)') :
+                
+            #elif (yChoice == 'y^2') :
+            
+            #elif (yChoice == 'ln(y)') :
+    def saveToCSV(self) :
+        ds = pd.DataFrame(self.graph.changeVar(self.dropDownX.GetStringSelection()), 
+            self.graph.changeVar(self.dropDownY.GetStringSelection()))
+        if (self.exportDataButton) :
+            ds.to_csv(self.dropDownX.GetStringSelection() + ' vs ' + 
+                self.dropDownY.GetStringSelection() + '.csv', index=False)
 
 app = wx.App(False)
 win = MainWindow(None)
