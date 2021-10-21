@@ -56,6 +56,7 @@ def getQuery(sql_query):
 def getEntireColumn(variable, table):
     sql_query = """SELECT """ + variable + " FROM " + table + ";"
     return getQuery(sql_query)
+    #put into dataframe where column name is variable
 
 def getLastImageID():
     sql_query = """SELECT imageID FROM images ORDER BY imageID DESC LIMIT 1;"""

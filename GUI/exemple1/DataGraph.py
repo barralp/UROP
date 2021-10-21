@@ -90,7 +90,8 @@ class MainWindow(wx.Frame):
         self.dropDownX.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
         self.dropDownY.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
         self.updateButton = wx.Button(self, label="Update Data", pos=[10, 435])
-        self.exportDataButton = wx.Button(self, label="Export Data", pos=[100, 435])
+        self.exportDataButton = wx.Button(self, label="Copy Data", pos=[100, 435])
+        self.exportDataButton.Bind(wx.EVT_BUTTON, self.copyToClipboard)
         #self.export   = wx.Button(self, label="Stop")
         self.panel = wx.Panel(self)
         self.sizer = wx.BoxSizer()
@@ -98,7 +99,7 @@ class MainWindow(wx.Frame):
             yVar=selectionY.GetStringSelection())
         self.panel.SetSizerAndFit(self.sizer)
         self.updateDropDown(0)
-        self.saveToCSV()
+
         self.Show()
 
     def updateDropDown(self, event) :
@@ -126,12 +127,13 @@ class MainWindow(wx.Frame):
             #elif (yChoice == 'y^2') :
             
             #elif (yChoice == 'ln(y)') :
-    def saveToCSV(self) :
-        ds = pd.DataFrame(self.graph.changeVar(self.dropDownX.GetStringSelection()), 
-            self.graph.changeVar(self.dropDownY.GetStringSelection()))
-        if (self.exportDataButton) :
-            ds.to_csv(self.dropDownX.GetStringSelection() + ' vs ' + 
-                self.dropDownY.GetStringSelection() + '.csv', index=False)
+    # Modify this to check if button is pressed then save to clipboard
+    def copyToClipboard(self, event) :
+        dictionary = {'x': self.graph.changeVar(self.dropDownX.GetStringSelection()), 
+            'y': self.graph.changeVar(self.dropDownY.GetStringSelection())}
+        ds = pd.DataFrame(dictionary)
+        if (self.dropDownY != '' and self.dropDownX != '') :
+            ds.to_clipboard()
 
 app = wx.App(False)
 win = MainWindow(None)
