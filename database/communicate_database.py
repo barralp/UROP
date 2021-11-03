@@ -30,9 +30,14 @@ def setConnection(typeOfConnection = 'local'):
 
 def setLocalConnection():
     # Open database connection
-    mydb = mysql.connector.connection.MySQLConnection(host = 
-        'localhost', user = 'root', password = 'DFLVXdq4$',
+    if (socket.gethostname() == 'MacBook-Pro-de-Pierre-3.local'):
+        mydb = mysql.connector.connection.MySQLConnection(host =
+        'localhost', user = 'student', password = 'w0lfg4ng',
         database = 'imagesdypoledatabase')
+    else:
+        mydb = mysql.connector.connection.MySQLConnection(host =
+            'localhost', user = 'root', password = 'DFLVXdq4$',
+            database = 'imagesdypoledatabase')
     #mydb = mysql.connector.connect(host = 'localhost',
      #                   user = 'root',
       #                  password = 'DFLVXdq4$',
