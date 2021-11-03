@@ -1,5 +1,8 @@
 import sys
 sys.path.insert(0, '../../database')
+import os
+# i found the following version more portable
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(sys.path[0])),'database')) # goes 2 level up
 from communicate_database import getEntireColumn
 import matplotlib
 import numpy
