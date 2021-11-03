@@ -51,9 +51,6 @@ class PlotPanel( wx.Panel ) :
             print('no matching')
         return data
 
-def returnFuncVar(self) :
-    return 0
-
 class MainWindow(wx.Frame):
     def __init__(self, parent):
         self.app = wx.App()
