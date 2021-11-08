@@ -129,11 +129,9 @@ class MainWindow(wx.Frame):
         self.panel.SetSizerAndFit(self.sizer)
         
         self.exportDataButton1 = wx.Button(self, label="Copy Data", pos=(410, 295))
-        self.exportDataButton1.Bind(event = wx.EVT_BUTTON, handler = self.copyToClipboard(graph = self.graph1, 
-            dropDownX = self.dropDownX1, dropDownY = self.dropDownY1, event = 0))
+        self.exportDataButton1.Bind(event = wx.EVT_BUTTON, handler = self.copyToClipboard)
         self.exportDataButton2 = wx.Button(self, label="Copy Data", pos=(410, 615))
-        self.exportDataButton2.Bind(event = wx.EVT_BUTTON, handler = self.copyToClipboard(graph = self.graph2,
-            dropDownX = self.dropDownX2, dropDownY = self.dropDownY2, event = 0))
+        self.exportDataButton2.Bind(event = wx.EVT_BUTTON, handler = self.copyToClipboard)
 
         self.updateDropDown(0)
 
@@ -191,13 +189,19 @@ class MainWindow(wx.Frame):
             
             #elif (yChoice == 'ln(y)') :
     # Modify this to check if button is pressed then save to clipboard
-    def copyToClipboard(self, graph, dropDownX, dropDownY, event) :
-        dictionary = {'x': graph.changeVar(dropDownX.GetStringSelection()), 
-            'y': graph.changeVar(dropDownY.GetStringSelection())}
-        ds = pd.DataFrame(dictionary)
-        if (dropDownY != '' and dropDownX != '') :  
-            ds.to_clipboard()
 
+    def copyToClipboardSecond(self, event):
+        event.GetEventObject() = self.ExportDataButtonX
+        graph = df
+        print(event.GetEventObject())
+            #dictionary = {'x': graph.changeVar(dropDownX.GetStringSelection()), 
+            #    'y': graph.changeVar(dropDownY.GetStringSelection())}
+            #ds = pd.DataFrame(dictionary)
+            #if (dropDownY != '' and dropDownX != '') :  
+            #    ds.to_clipboard()
+        
+    def copyToClipboard(self, temp=button_name) :
+        return copyToClipboardSecond(self, temp)
 
 app = wx.App(False)
 win = MainWindow(None)
