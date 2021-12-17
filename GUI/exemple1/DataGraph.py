@@ -1,4 +1,6 @@
 import sys
+
+from wx.core import EVT_CHECKBOX
 sys.path.insert(0, '../../database')
 import os
 # i found the following version more portable
@@ -7,6 +9,7 @@ from communicate_database import getEntireColumn
 import matplotlib
 import numpy
 import wx
+import wx.lib.scrolledpanel
 import numpy as np
 import pandas as pd
 
@@ -17,7 +20,7 @@ from matplotlib.figure import Figure
 
 
 class PlotPanel( wx.Panel ) :
-    def __init__( self, parent, position, xVar, yVar ) :
+    def __init__( self, parent, position) :
         wx.Panel.__init__( self, parent, pos=position, size=(625,250) )
         # initialize matplotlib 
         self.figure = matplotlib.figure.Figure( None, facecolor="white" )
@@ -31,30 +34,6 @@ class PlotPanel( wx.Panel ) :
         self.axes.grid(True, color="gray")
         self._SetSize()
         self.Bind( wx.EVT_SIZE, self._SetSize )
-        #self.XData = self.getX()
-        #self.YData = self.getY()
-    #-----------------------------------------------------------------------------------
-    def _SetSize( self, event=None ):
-        pixels = self.GetSize() 
-        self.SetSize( pixels )
-        self.canvas.SetSize( pixels )
-
-        dpi = self.figure.get_dpi()
-        self.figure.set_size_inches( float( pixels[0] ) / dpi,float( pixels[1] ) / dpi )
-    #------------------------------------------------------------------------------------
-
-    def changeVar(self, selection) :
-        if (selection != '') :
-            data = getEntireColumn(selection, 'ciceroOut')
-        else :
-            data = []
-            print('no matching')
-        return data
-
-class MainWindow(wx.Frame):
-    def __init__(self, parent):
-        self.app = wx.App()
-        wx.Frame.__init__(self, parent, title="Database Variable graphing", size=(2000,1200))
         variables = ['runID', 'IterationNum', 'IterationCount', 'RunningCounter', 
             'TOF', 'CompLevel', 'ImgFreq', 'dummy', 'IodineFreq', 'FinalBField',
             'CameraFudgeTime', 'LoadTime', 'CompTime', 'LoadCurrent', 'timestamp',
@@ -78,109 +57,59 @@ class MainWindow(wx.Frame):
         relationsX = ["x", "log(x)", "x^2", "x^0.5"]
         relationsY = ["y", "log(y)", "y^2", "y^0.5"]
 
-        self.textX1 = wx.StaticText(self, label = "X Variable", pos = (10, 275))
-        self.textY1 = wx.StaticText(self, label = "Y Variable", pos = (10, 300))  
-        self.textX2 = wx.StaticText(self, label = "X Variable", pos = (10, 595))
-        self.textY2 = wx.StaticText(self, label = "Y Variable", pos = (10, 620))
-        #self.textX3 = wx.StaticText(self, label = "X Variable", pos = ())
-        #self.textY3 = wx.StaticText(self, label = "Y Variable"), pos = ())
+        self.textX = wx.StaticText(self, label = "X Variable", pos = (10, 200))
+        self.textY = wx.StaticText(self, label = "Y Variable", pos = (10, 620))
 
-        self.dropDownX1 = wx.ComboBox(self, choices = variables, pos = (70, 270))
-        self.dropDownY1 = wx.ComboBox(self, choices = variables, pos = (70, 295))
-        self.dropDownX2 = wx.ComboBox(self, choices = variables, pos = (70, 590))
-        self.dropDownY2 = wx.ComboBox(self, choices = variables, pos = (70, 615))
-        #self.dropDownX3 = wx.ComboBox(self, choices = variables, pos = ())
-        #self.dropDownY3 = wx.ComboBox(self, choices = variables, pos = ())
+        self.dropDownX = wx.ComboBox(self, choices = variables, pos = (70, 590))
+        self.dropDownY = wx.ComboBox(self, choices = variables, pos = (70, 615))
 
-        self.textXRelations1 = wx.StaticText(self, label = "X Transformation", pos = (240, 275))
-        self.textYRelations1 = wx.StaticText(self, label = "Y Transformation", pos = (240, 300))
-        self.textXRelations2 = wx.StaticText(self, label = "X Transformation", pos = (240, 595))
-        self.textYRelations2 = wx.StaticText(self, label = "Y Transformation", pos = (240, 620))
-        #self.textXRelations3 = wx.StaticText(self, label = "X Transformation", pos = ())
-        #self.textYRelations3 = wx.StaticText(self, label = "Y Transformation", pos = ())
+        self.textXRelations = wx.StaticText(self, label = "X Transformation", pos = (240, 275))
+        self.textYRelations = wx.StaticText(self, label = "Y Transformation", pos = (240, 300))
 
         self.dropDownXRelations1 = wx.ComboBox(self, choices = relationsX, pos = (340, 270))
         self.dropDownYRelations1 = wx.ComboBox(self, choices = relationsY, pos = (340, 295))
-        self.dropDownXRelations2 = wx.ComboBox(self, choices = relationsX, pos = (340, 590))
-        self.dropDownYRelations2 = wx.ComboBox(self, choices = relationsY, pos = (340, 615))
-        #self.dropDownXRelations3 = wx.ComboBox(self, choices = relationsX, pos = ())
-        #self.dropDownYRelations3 = wx.ComboBox(self, choices = relationsY, pos = ())
         
-        selectionX1 = self.dropDownX1
-        selectionY1 = self.dropDownY1
+        #selectionX1 = self.dropDownX1
+        #selectionY1 = self.dropDownY1
         
-        self.dropDownX1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
-        self.dropDownY1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
-        self.dropDownX2.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
-        self.dropDownY2.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
+        self.dropDownX.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
+        self.dropDownY.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
+        #self.dropDownX2.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
+        #self.dropDownY2.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
         
         self.updateButton1 = wx.Button(self, label="Update Data", pos=(1000, 330))
         self.boundBoxX = wx.StaticText(self, label="X bounds", pos=(660, 335))
         #self.lowerBoundX = wx.text
         self.boundBoxY = wx.StaticText(self, label="Y bounds", pos=(660, 360))
 
-        #self.export   = wx.Button(self, label="Stop")
+        self.export = wx.Button(self, label="Stop")
         self.panel = wx.Panel(self)
         self.sizer = wx.BoxSizer()
-        self.graph1 = PlotPanel( self, position=(10, 10), xVar=selectionX1.GetStringSelection(), 
-            yVar=selectionY1.GetStringSelection())
-        self.graph2 = PlotPanel( self, position=(10, 330), xVar=selectionX1.GetStringSelection(), 
-            yVar=selectionY1.GetStringSelection())
         self.panel.SetSizerAndFit(self.sizer)
         
         self.exportDataButton1 = wx.Button(self, label="Copy Data", pos=(410, 295))
-        self.exportDataButton1.Bind(event = wx.EVT_BUTTON, handler = self.copyToClipboard)
+        self.exportDataButton1.Bind(wx.EVT_BUTTON, lambda event: self.copyToClipboard(1))
         self.exportDataButton2 = wx.Button(self, label="Copy Data", pos=(410, 615))
-        self.exportDataButton2.Bind(event = wx.EVT_BUTTON, handler = self.copyToClipboard)
+        self.exportDataButton2.Bind(wx.EVT_BUTTON, lambda event: self.copyToClipboard(2))
+
+        self.doublePlot1 = wx.CheckBox(self, label="Display Two Plots", pos=(410, 270))
+        self.doublePlot1.Bind(event=wx.EVT_CHECKBOX, handler=self.toggleSecondPlot)
 
         self.updateDropDown(0)
 
+        self.dropDownX = wx.ComboBox(self, choices = [], pos = (70, 270))
+        self.dropDownY = wx.ComboBox(self, choices = [], pos = (70, 295))
+
+        self.textX1 = wx.StaticText(self, label = "X Variable", pos = (10, 275))
+        self.textY1 = wx.StaticText(self, label = "Y Variable", pos = (10, 300))  
+
         self.Show()
+    #-----------------------------------------------------------------------------------
 
-    def updateDropDown(self, event) :
-        self.graph1.axes.cla()       
-        self.graph1.axes.set_title(self.dropDownX1.GetStringSelection()
-            + " vs. " + self.dropDownY1.GetStringSelection()) 
-        self.graph1.axes.set_xlabel(self.dropDownX1.GetStringSelection()) ## change later
-        self.graph1.axes.set_ylabel(self.dropDownY1.GetStringSelection())
-        if self.dropDownY1.GetStringSelection() != "" and self.dropDownY1.GetStringSelection() != "":
-            self.graph1.axes.plot(self.graph1.changeVar(self.dropDownX1.GetStringSelection()),
-               self.graph1.changeVar(self.dropDownY1.GetStringSelection()), marker ='o', ls = '')
-            self.graph1.axes.plot([],[])
-        else :
-            self.graph1.axes.plot([],[])
-        self.graph1.canvas.draw()
-
-        self.graph2.axes.cla()       
-        self.graph2.axes.set_title(self.dropDownX2.GetStringSelection()
-            + " vs. " + self.dropDownY2.GetStringSelection()) 
-        self.graph2.axes.set_xlabel(self.dropDownX2.GetStringSelection()) ## change later
-        self.graph2.axes.set_ylabel(self.dropDownY2.GetStringSelection())
-        if self.dropDownY2.GetStringSelection() != "" and self.dropDownY2.GetStringSelection() != "":
-            self.graph2.axes.plot(self.graph2.changeVar(self.dropDownX2.GetStringSelection()),
-               self.graph2.changeVar(self.dropDownY2.GetStringSelection()), marker ='o', ls = '')
-            self.graph2.axes.plot([],[])
-        else :
-            self.graph2.axes.plot([],[])
-        self.graph2.canvas.draw()
-
-        #self.graph3.axes.cla()       
-        #self.graph3.axes.set_title(self.dropDownX3.GetStringSelection()
-        #    + " vs. " + self.dropDownY3.GetStringSelection()) 
-        #self.graph3.axes.set_xlabel(self.dropDownX3.GetStringSelection()) ## change later
-        #self.graph3.axes.set_ylabel(self.dropDownY3.GetStringSelection())
-        #if self.dropDownY3.GetStringSelection() != "" and self.dropDownY3.GetStringSelection() != "":
-         #   self.graph3.axes.plot(self.graph3.changeVar(self.dropDownX3.GetStringSelection()),
-          #     self.graph3.changeVar(self.dropDownY3.GetStringSelection()), marker ='o', ls = '')
-           # self.graph3.axes.plot([],[])
-        #else :
-         #   self.graph3.axes.plot([],[])
-        #self.graph3.canvas.draw()
-    
-    def applyTransformation(self) : # use for plotting different 
-        xChoice = self.dropDownXRelations1.GetStringSelection()
-        yChoice = self.dropDownYRelations1.GetStringSelection()
-        #if (xChoice != '' & 'x') :
+    def applyTransformation(self, event) : # use for plotting different 
+        xChoice = self.dropDownXRelations.GetStringSelection()
+        yChoice = self.dropDownYRelations.GetStringSelection()
+        #if (xChoice != '' & self.GetDropDownX Y) :
         
         #if (yChoice != '' & 'y') :
             #if (yChoice == 'log(y)') :
@@ -188,20 +117,74 @@ class MainWindow(wx.Frame):
             #elif (yChoice == 'y^2') :
             
             #elif (yChoice == 'ln(y)') :
+    
     # Modify this to check if button is pressed then save to clipboard
 
+    def _SetSize( self, event=None ):
+        pixels = self.GetSize() 
+        self.SetSize( pixels )
+        self.canvas.SetSize( pixels )
+
+        dpi = self.figure.get_dpi()
+        self.figure.set_size_inches( float( pixels[0] ) / dpi,float( pixels[1] ) / dpi )
+    #------------------------------------------------------------------------------------
+
+    def changeVar(self, selection) :
+        if (selection != '') :
+            data = getEntireColumn(selection, 'ciceroOut')
+        else :
+            data = []
+            print('no matching')
+        return data
+
+    def updateDropDown(self, event) :
+        self.axes.cla()  
+        dropDownX = self.dropDownX.GetStringSelection()
+        dropDownY = self.dropDownY.GetStringSelection()
+        self.axes.set_title(dropDownX + " vs. " + dropDownY) 
+        self.axes.set_xlabel(dropDownX) ## change later
+        self.axes.set_ylabel(dropDownY)
+        if (dropDownY != "" and dropDownX != "") :
+            self.axes.plot(self.changeVar(dropDownX),
+            self.changeVar(dropDownY), marker ='o', ls = '')
+            self.axes.plot([],[])
+        else :
+            self.axes.plot([],[])
+            self.canvas.draw()
+
     def copyToClipboardSecond(self, event):
-        event.GetEventObject() = self.ExportDataButtonX
-        graph = df
+        #event.GetEventObject() = self.ExportDataButtonX
         print(event.GetEventObject())
-            #dictionary = {'x': graph.changeVar(dropDownX.GetStringSelection()), 
-            #    'y': graph.changeVar(dropDownY.GetStringSelection())}
-            #ds = pd.DataFrame(dictionary)
-            #if (dropDownY != '' and dropDownX != '') :  
-            #    ds.to_clipboard()
-        
-    def copyToClipboard(self, temp=button_name) :
-        return copyToClipboardSecond(self, temp)
+        dictionary = {'x': self.graph1.changeVar(self.dropDownX.GetStringSelection()), 
+            'y': self.graph1.changeVar(self.dropDownY.GetStringSelection())}
+        ds = pd.DataFrame(dictionary)
+        if (self.dropDownY.GetStringSelection() != '' and self.dropDownX.GetStringSelection() != '') :  
+            ds.to_clipboard()
+
+    def createDataFrame(self, dropDownX, dropDownY, graph):
+        dictionary = {'x': self.graph.changeVar(dropDownX.GetStringSelection()), 
+            'y': self.graph.changeVar(dropDownY.GetStringSelection())}
+        df = pd.DataFrame(dictionary)
+        return df
+
+    def copyToClipboard(self, index) :
+        df = self.createDataFrame(self.dropDownX, self.dropDownY)
+    
+    def toggleSecondPlot(self, event) :
+        checked = self.doublePlot1.Get3StateValue()
+        print(checked)
+        #if checked:
+        #    self.graph1.
+        #else :
+
+class MainWindow(wx.Frame):
+    def __init__(self, parent):
+        self.app = wx.App()
+        wx.Frame.__init__(self, parent, title="Database Variable graphing", size=(500,300))
+        self.graph1 = PlotPanel(self, position=(10, 10))
+        self.graph2 = PlotPanel(self, position=(700, 10))
+        self.graph3 = PlotPanel(self, position=(10, 400))
+        self.Show()
 
 app = wx.App(False)
 win = MainWindow(None)

@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np; np.random.seed(1)
 
+#%matplotlib qt
 x = np.random.rand(15)
 y = np.random.rand(15)
 names = np.array(list("ABCDEFGHIJKLMNO"))
