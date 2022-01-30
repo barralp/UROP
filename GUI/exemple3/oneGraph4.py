@@ -14,10 +14,10 @@ from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 
-class DypoleCalculatorUI(wx.Frame):
+class DypoleDatabaseViewer(wx.Frame):
     def __init__(self, parent, title):
         self.app = wx.App()
-        super(DypoleCalculatorUI, self).__init__(parent, title = title, size=(1000, 500))
+        wx.Frame.__init__(self, parent, title = title, size = (1000, 500))
         self.start()
         
     def start(self):
@@ -29,10 +29,10 @@ class DypoleCalculatorUI(wx.Frame):
     
         self.basePanel = wx.lib.scrolledpanel.ScrolledPanel(self, id = -1, size = (1,1))
         self.basePanel.SetupScrolling()
-        self.mainWindowBoxSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.mainWindowBoxSizer = wx.BoxSizer(wx.VERTICAL)
         
         self.firstRowBox = wx.StaticBox(self.basePanel, label='Upper box')
-        self.firstRowBoxSizer = wx.StaticBoxSizer(self.firstRowBox, wx.VERTICAL)
+        self.firstRowBoxSizer = wx.StaticBoxSizer(self.firstRowBox, wx.HORIZONTAL)
         
         self.Box11 = wx.StaticBox(self.basePanel, label='Graph 1')
         self.BoxSizer11 = wx.StaticBoxSizer(self.Box11, wx.HORIZONTAL)
@@ -50,7 +50,7 @@ class DypoleCalculatorUI(wx.Frame):
         self.secondRowBox = wx.StaticBox(self.basePanel, label='Lower box')
         self.secondRowBoxSizer = wx.StaticBoxSizer(self.secondRowBox, wx.VERTICAL)
         
-        self.Box21 = wx.StaticBox(self.basePanel, label='Graph 1')
+        self.Box21 = wx.StaticBox(self.basePanel, label='Graph 3')
         self.BoxSizer21 = wx.StaticBoxSizer(self.Box21, wx.HORIZONTAL)
 
         self.graph3 = PlotPanel(self.basePanel)
@@ -132,5 +132,5 @@ class PlotPanel(wx.Panel):
     
         
 if __name__ == '__main__':
-    ui = DypoleCalculatorUI(None, title='"Database graphing"')
+    ui = DypoleDatabaseViewer(None, title='"Database viewer"')
     ui.app.MainLoop()
