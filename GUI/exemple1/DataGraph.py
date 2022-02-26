@@ -1,29 +1,40 @@
-import sys
-
-from wx.core import EVT_CHECKBOX
-sys.path.insert(0, '../../database')
-import os
+##from wx.core import EVT_CHECKBOX
+##sys.path.insert(0, '../../database')
+##import os
 # i found the following version more portable
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(sys.path[0])),'database')) # goes 2 level up
-from communicate_database import getEntireColumn
-import matplotlib
-import numpy
-import wx
-import wx.lib.scrolledpanel
-import numpy as np
-import pandas as pd
+##sys.path.append(os.path.join(os.path.dirname(os.path.dirname(sys.path[0])),'database')) # goes 2 level up
+##from communicate_database import getEntireColumn
+##import matplotlib
+##import numpy
+##import wx
+##import wx.lib.scrolledpanel
+##import numpy as np
+##import pandas as pd
+##import sys
 
-matplotlib.use('WXAgg')
+##matplotlib.use('WXAgg')
 
-from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
-from matplotlib.figure import Figure
+##from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
+##from matplotlib.figure import Figure
 
 
-class PlotPanel( wx.Panel ) :
-    def __init__( self, parent):#, position) :
-        wx.Panel.__init__( self, parent, size=(625, 350))#, pos=position)
+class PlotPanel( wx.Frame ) :
+
+    def __init__(self, parent, title):
+        self.app = wx.App()
+        wx.Frame.__init__(self, parent, title = title, size = (1000, 500))
+        self.start()
+
+    def start(self):
+        self.InitUI()
+        self.Centre()
+        self.Show()
+
+    def InitUI(self):
+
+        # wx.Panel.__init__( self, parent, size=(625, 350))#, pos=position)
         # initialize matplotlib 
-        self.figure = matplotlib.figure.Figure(facecolor="white", figsize=(6,6))
+        #self.figure = matplotlib.figure.Figure(facecolor="white", figsize=(6,6))
         
         self.mainBoxSizer = wx.BoxSizer(wx.HORIZONTAL)
         
@@ -46,33 +57,7 @@ class PlotPanel( wx.Panel ) :
 
         self._SetSize()
         self.Bind( wx.EVT_SIZE, self._SetSize )
-        variables = ['runID', 'IterationNum', 'IterationCount', 'RunningCounter', 
-            'TOF', 'CompLevel', 'ImgFreq', 'dummy', 'IodineFreq', 'FinalBField',
-            'CameraFudgeTime', 'LoadTime', 'CompTime', 'LoadCurrent', 'timestamp',
-            'wee', 'MotLoadFreq', 'MotCompFreq', 'time', 'ZSPower', 'imageTime', 
-            'MOTLevel', 'compx', 'compy', 'LossTime', 'TCFreq', 'compz', 'MOTCurrent_Amps',
-            'MOTLoadCurrent_Amps', 'CompTime2', 'CompLevel2', 'MOTCompFreq2', 'FreqCompTime2',
-            'FinalYComp', 'CompHoldTime', 'WaitTime', 'ASPower', 'ASPower_mW', 'ASPower_mW_2',
-            'MOTCurrent2', 'level1', 'level2', 'level3', 'level4', 'level5', 'freq1', 'freq2',
-            'freq3', 'freq4', 'freq5', 'ODT_Ramp', 'ODTHoldTime', 'ODT1_Final', 'ODT2_Final',
-            'EvapTime2', 'EvapTime1', 'EvapTime3', 'BigZ', 'SGOn', 'SGOn2', 'PumpTime', 
-            'DopplerCoolFreq', 'ODT1_Init', 'ODT1_Evap1_End', 'ODT2_Init', 'ODT2_Evap1_End',
-            'FeshbachCurrent', 'EvapTime4', 'AMFreq', 'AMDuration', 'ODTRampUp', 'Evap2Factor',
-            'tau', 'totalExp', 'InTrapCoolFreq', 'InTrapCoolTime', 'EvapTime5', 'Evap1_End_Gradient',
-            'Var60', 'EvapScan', 'EvapGradientInit', 'Evap_Gradient1', 'Evap_Gradient2',
-            'Evap_Gradient3', 'Evap_End_Gradient', 'ODT_TOF_Gradient', 'ODT_TOF_BigZ', 
-            'Evap5_BigZ', 'FinalODT1', 'BlinckingTime', 'Blincking_freq', 'Molasses_level',
-            'Blincking_duration', 'ODT_Molasses', 'ODT_Molasses_ZField', 'ODTLoad_MOT_Freq',
-            'ODTcompx', 'ODTcompy', 'ODTcompz', 'Blinckinglength', 'ODTLoad_MOTFreq', 
-            'Evap1_CompZ', 'Pumping_Freq', 'compx_Earth', 'compy_Earth', 'compz_Earth',
-            'EvapTime6', 'compz2']
-        relationsX = ["x", "log(x)", "x^2", "x^0.5"]
-        relationsY = ["y", "log(y)", "y^2", "y^0.5"]
 
-        self.xBox = wx.StaticBox(self, label='X parameters')
-        self.xBoxSizer = wx.StaticBoxSizer(self.xBox, wx.VERTICAL)
-        self.yBox = wx.StaticBox(self, label='Y parameters')
-        self.yBoxSizer = wx.StaticBoxSizer(self.yBox, wx.VERTICAL)
 
         self.textX1 = wx.StaticText(self, label = "X Variable")#, pos = (10, 285))
         self.textY1 = wx.StaticText(self, label = "Y Variable")#, pos = (10, 310))  
@@ -111,7 +96,6 @@ class PlotPanel( wx.Panel ) :
         #self.export = wx.Button(self, label="Stop")
         ##self.panel = wx.Panel(self)
         ##self.sizer = wx.BoxSizer()
-        ##self.panel.SetSizerAndFit(self.sizer)
         
         #self.exportDataButton1 = wx.Button(self, label="Copy Data")#, pos=(410, 295))
         #self.exportDataButton1.Bind(wx.EVT_BUTTON, lambda event: self.copyToClipboard(1))
@@ -126,12 +110,6 @@ class PlotPanel( wx.Panel ) :
         #self.dropDownX1 = wx.ComboBox(self, choices = variables)#, pos = (70, 270))
         #self.dropDownY1 = wx.ComboBox(self, choices = variables)#, pos = (70, 295))
 
-        self.menuBoxSizer.Add(self.yBoxSizer, flag=wx.ALL|wx.EXPAND, border = 5)
-        self.menuBoxSizer.Add(self.xBoxSizer, flag=wx.ALL|wx.EXPAND, border = 5)
-
-        self.mainBoxSizer.Add(self.figureBoxSizer, flag=wx.ALL|wx.EXPAND, border = 5)
-
-        # self.Show()
     #-----------------------------------------------------------------------------------
 
     def applyTransformation(self, event) : # use for plotting different 
@@ -195,8 +173,8 @@ class PlotPanel( wx.Panel ) :
         df = pd.DataFrame(dictionary)
         return df
 
-    def copyToClipboard(self, index) :
-        df = self.createDataFrame(self.dropDownX, self.dropDownY)
+    #def copyToClipboard(self, index) :
+     #   df = self.createDataFrame(self.dropDownX, self.dropDownY)
     
     def toggleSecondPlot(self, event) :
         checked = self.doublePlot1.Get3StateValue()

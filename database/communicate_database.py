@@ -13,6 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import socket
+import re
 
 MYSQLserverIP = "192.168.1.133"
 username = "root"
@@ -91,6 +92,14 @@ def executeGetQuery(sql_query): # works when you don't need to use db.commit, so
     cursor.close()
     db.close()
     return cursorResult
+
+def getVariableList(table) :
+    sql_query = f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'{table}'"
+    varList = executeGetQuery(sql_query)
+    regex = re.compile(r'_unusedcolumn_*')
+    newVarList = [element[0] for element in varList]
+    filtered = [i for i in newVarList if not regex.search(i)]
+    return filtered
 
 #lastImageID = getLastImageID()
 #lastRunID = getRunIDFromImageID(lastImageID)
