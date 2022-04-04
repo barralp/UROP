@@ -1,19 +1,20 @@
 
 from wx.core import EVT_CHECKBOX
 
-from database.communicate_database import getVariableList
 sys.path.insert(0, '../../database')
 import os
+import sys
 # i found the following version more portable
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(sys.path[0])),'database')) # goes 2 level up
-from communicate_database import getEntireColumn, getVariablesList
+from communicate_database import getEntireColumn
+import DataFrame
+#from DataFrame import getVariableList
 import matplotlib
 import numpy
 import wx
 import wx.lib.scrolledpanel
 import numpy as np
 import pandas as pd
-import sys
 
 matplotlib.use('WXAgg')
 
@@ -71,12 +72,12 @@ class DypoleDatabaseViewer(wx.Frame):
         
 
 class PlotPanel(wx.Panel):
+    dataFrame = DataFrame.DataFrame()
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         self.initPlotPanel()
     
     def initPlotPanel(self):
-        
         self.mainBoxSizer = wx.BoxSizer(wx.VERTICAL)
         
         self.setUpFigure()
@@ -126,12 +127,13 @@ class PlotPanel(wx.Panel):
         self.textX1 = wx.StaticText(self, label = "X Variable")
         self.textY1 = wx.StaticText(self, label = "Y Variable")
     
-        vars = getVariablesList()
+        varsX = self.dataFrame.getVariableList("CiceroOut")
+        varsY = self.dataFrame.getVariableList("nCount")
         relationsX = ["x", "log(x)", "x^2", "x^0.5"]
         relationsY = ["y", "log(y)", "y^2", "y^0.5"]
         
-        self.dropDownX1 = wx.ComboBox(self, choices = vars)
-        self.dropDownY1 = wx.ComboBox(self, choices = vars)
+        self.dropDownX1 = wx.ComboBox(self, choices = varsX)
+        self.dropDownY1 = wx.ComboBox(self, choices = varsY)
 
         self.dropDownX1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
         self.dropDownY1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
@@ -157,7 +159,7 @@ class PlotPanel(wx.Panel):
     
     def changeVar(self, selection) :
         if (selection != '') :
-            data = getEntireColumn(selection, 'ciceroOut')
+            data = self.dataFrame.getCoordinates(self.dropDownX1, self.dropDownY1)
         else :
             data = []
             print('no matching')
