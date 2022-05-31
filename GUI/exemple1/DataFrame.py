@@ -11,44 +11,34 @@ import numpy as np
 import pandas as pd
 
 
-class DataFrame():
+class DataFrame(pd.DataFrame):
     def __init__(self) :
-        self.dataFrame = [{}]
-
+        xData = {
+            "variable:" : "X",
+            "data" : []
+        }
+        yData = {
+            "variable: " : "Y",
+            "data" : []
+        }
+        #self.dataFrame.add
+        
     def addToDataFrame(self, dropDownX, dropDownY) :
-        #if ()
         self.dataFrame.update = {'x': self.graph.changeVar(dropDownX.GetStringSelection()), 
         'y': self.graph.changeVar(dropDownY.GetStringSelection())}
         df = pd.DataFrame(self.dataFrame)
         return df
 
-    def getCoordinates(self, dropDownX, dropDownY) :
-        varX = []
-        varY = []
-        length = len(self.dataFrame)
-        for i in self.dataFrame :
-            if (dropDownX != self.dataFrame[i{1}]) :
-                if (i != self.dataFrame.length) :
-                    i += 1
-                else :
-                    i = len(self.dataFrame)
-                    self.dataFrame.__add__({'table' : 'ciceroOut', 'dropDown' : dropDownX, 
-                        'values' : getEntireColumn(dropDownX, "ciceroOut")})
-                    varX = self.dataFrame[i{2}]
-            else :
-                varX = self.dataFrame[0]
-            
-            if (dropDownY != self.dataFrame[i{1}]) :
-                if (i != self.dataFrame.length) :
-                    i += 1
-                else :
-                    i = len(self.dataFrame)
-                    self.dataFrame.__add__({'table' : 'nCount', 'dropDown' : dropDownY, 
-                        'values' : getEntireColumn(dropDownY, "nCounts")})
-                    varY = self.dataFrame[i{2}]
-            else :
-                varY = self.dataFrame[0]
-        return [varX, varY]
+    def appendDataFrame(self, dropDownX, dropDownY) :
+        if (dropDownX != self.dataFrame) :
+            self.dataFrame.append()
+            self.dataFrame.__add__({'table' : 'ciceroOut', 'dropDown' : dropDownX, 
+                'values' : getEntireColumn(dropDownX, "ciceroOut")})
+
+        if (dropDownY != self.dataFrame) :
+            self.dataFrame.append
+            self.dataFrame.__add__({'table' : 'nCount', 'dropDown' : dropDownY, 
+                'values' : getEntireColumn(dropDownY, "nCount")})
 
     def getDataFrame(self) :
         return self.dataFrame
