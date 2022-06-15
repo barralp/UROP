@@ -1,4 +1,3 @@
-
 from re import X
 from sqlalchemy import column
 from wx.core import EVT_CHECKBOX
@@ -9,7 +8,7 @@ import sys
 # i found the following version more portable
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(sys.path[0])),'database')) # goes 2 level up
 from communicate_database import getEntireColumn
-from communicate_database import getVariableList
+from communicate_database import getVariableList#, getLastImageID
 import matplotlib
 import numpy
 import wx
@@ -38,9 +37,25 @@ class DypoleDatabaseViewer(wx.Frame):
         self.Show()
 
     #def modifyDataframe(self, xVar, yVar) :
+
+    def updateData(self) :
+        self.graph1.updateData()
+        self.graph2.updateData()
+        self.graph3.updateData()
         
     #def copyDataFrame(self) :
-    
+    ##if __name__ == '__main__' :
+      ##  t1 = threading.Thread(target=updateDropDown())
+        #t2 = threading.Thread(target=checkForNewData())
+
+        #t1.start()
+        #t2.start()
+
+      #  t1.join()
+       # t2.join()
+
+        #logging.info('Done!')
+
     def InitUI(self):
         self.basePanel = wx.lib.scrolledpanel.ScrolledPanel(self, id = -1, size = (1,1))
         self.basePanel.SetupScrolling()
@@ -63,15 +78,22 @@ class DypoleDatabaseViewer(wx.Frame):
         self.firstRowBoxSizer.Add(self.BoxSizer12)
         
         self.secondRowBox = wx.StaticBox(self.basePanel, label='Lower box')
-        self.secondRowBoxSizer = wx.StaticBoxSizer(self.secondRowBox, wx.VERTICAL)
+        self.secondRowBoxSizer = wx.StaticBoxSizer(self.secondRowBox, wx.HORIZONTAL)
         
         self.Box21 = wx.StaticBox(self.basePanel, label='Graph 3')
         self.BoxSizer21 = wx.StaticBoxSizer(self.Box21, wx.HORIZONTAL)
 
         self.graph3 = PlotPanel(self.basePanel)
         self.BoxSizer21.Add(self.graph3, flag=wx.ALL|wx.EXPAND, border = 5)
-        
+
+        self.Box22 = wx.StaticBox(self.basePanel, label='Control box')
+        self.BoxSizer22 = wx.StaticBoxSizer(self.Box22, wx.HORIZONTAL)
+
+        self.updateButton = wx.Button(self.basePanel, wx.ID_ANY, 'Check for new data')
+        self.BoxSizer22.Add(self.updateButton, flag=wx.ALL|wx.EXPAND, border=5)
+
         self.secondRowBoxSizer.Add(self.BoxSizer21)
+        self.secondRowBoxSizer.Add(self.BoxSizer22)
         
         self.mainWindowBoxSizer.Add(self.firstRowBoxSizer)
         self.mainWindowBoxSizer.Add(self.secondRowBoxSizer)
@@ -108,7 +130,7 @@ class PlotPanel(wx.Panel):
         return self.dataFrame
     
     def setUpFigure(self):
-        self.figure = matplotlib.figure.Figure(facecolor='white', figsize=(4,4))
+        self.figure = matplotlib.figure.Figure(facecolor='white', figsize=(6    ,4))
         self.canvas = matplotlib.backends.backend_wxagg.FigureCanvasWxAgg(self, -1, self.figure)
         self.axes = self.figure.add_subplot(111)
         self.axes.grid(True, color='gray')
@@ -119,7 +141,7 @@ class PlotPanel(wx.Panel):
         self.axes.grid(True, color='gray')
     
     def updateDropDown(self, event) :
-        self.axes.cla()  
+        self.axes.cla()
         dropDownX = self.dropDownX1.GetStringSelection()
         dropDownY = self.dropDownY1.GetStringSelection()
         self.axes.set_title(dropDownX + ' vs. ' + dropDownY) 
@@ -128,10 +150,10 @@ class PlotPanel(wx.Panel):
         if (dropDownY != '' and dropDownX != '') :
             self.changeVar()
             self.axes.plot(self.dataFrame['x'], self.dataFrame['y'], marker ='o', ls='')
-            self.axes.plot([],[])
+            #self.axes.plot([],[])
         else :
             self.axes.plot([],[])
-            self.canvas.draw()
+        self.canvas.draw()
 
     def setUpMenu(self):
         self.xBox = wx.StaticBox(self, label='X parameters')
@@ -172,60 +194,50 @@ class PlotPanel(wx.Panel):
         self.menuBoxSizer.Add(self.yBoxSizer)
         self.updateDropDown(0)
 
+    def updateData(self) :
+        self.changeVar()
+
     def checkForNewData(self) :
-        time.sleep(2)
-        lenX = len(getEntireColumn(self.dropDownX1.GetStringSelection(), 'ciceroOut'))
-        lenY = len(getEntireColumn(self.dropDownY1.GetStringSelection(), 'ciceroOut'))
+        while True:
+            time.sleep(2)
+            lenX = len(getEntireColumn(self.dropDownX1.GetStringSelection(), 'ciceroOut'))
+            lenY = len(getEntireColumn(self.dropDownY1.GetStringSelection(), 'ciceroOut'))
 
-        if len(self.dataFrame['Y']) != lenX and len(self.dataFrame['X']) != lenY :
-            self.dataFrame['Y'].append(getEntireColumn(self.dropDownY1.GetStringSelection(), 'ciceroOut')[lenX - 1])
-            self.dataFrame['X'].append(getEntireColumn(self.dropDownX1.GetStringSelection(), 'ciceroOut')[lenY - 1])
-
-    
-    if __name__ == '__main__' :
-        t1 = threading.Thread(target=updateDropDown())
-        t2 = threading.Thread(target=checkForNewData())
-
-        t1.start()
-        t2.start()
-
-        t1.join()
-        t2.join()
-
-        logging.info('Done!')
+            if len(self.dataFrame['Y']) != lenX and len(self.dataFrame['X']) != lenY :
+                self.dataFrame['Y'].append(getEntireColumn(self.dropDownY1.GetStringSelection(), 'ciceroOut')[lenX - 1])
+                self.dataFrame['X'].append(getEntireColumn(self.dropDownX1.GetStringSelection(), 'ciceroOut')[lenY - 1])
 
     
     def changeVar(self) :
         if (self.dropDownX1.GetStringSelection() != '' and self.dropDownY1.GetStringSelection() != '') :
             self.dataFrame.drop(columns=['x', 'y'], inplace=True)
-            print(getEntireColumn(self.dropDownX1.GetStringSelection(), 'ciceroOut'))
             data = {
-                'x' : getEntireColumn(self.dropDownY1.GetStringSelection(), 'ciceroOut'),
+                'x' : getEntireColumn(self.dropDownX1.GetStringSelection(), 'ciceroOut'),
                 'y' : getEntireColumn(self.dropDownY1.GetStringSelection(), 'ciceroOut')
             }
-            if (self.dropDownXRelations1.GetStringSelection() != '') :
-                if (self.dropDownXRelations1.GetStringSelection() == 'ln(x)') :
-                    data['X'] = math.log(data['X'])
-                elif (self.dropDownXRelations1.GetStringSelection() == 'x^2') :
-                    data['X'] = math.pow(data['X'], 2)
-                elif (self.dropDownXRelations1.GetStringSelection() == 'sqrt(x)') :
-                    data['X'] = math.pow(data['X'], 0.5)
-                else : 
-                    data['X'] = data['X']
+            #if (self.dropDownXRelations1.GetStringSelection() != '') :
+             #   if (self.dropDownXRelations1.GetStringSelection() == 'ln(x)') :
+              #      data['x'] = math.log(data['x'])
+               # elif (self.dropDownXRelations1.GetStringSelection() == 'x^2') :
+                #    data['x'] = math.pow(data['x'], 2)
+               # elif (self.dropDownXRelations1.GetStringSelection() == 'sqrt(x)') :
+                #    data['x'] = math.pow(data['x'], 0.5)
+                #else : 
+                 #   data['x'] = data['x']
             
-            if(self.dropDownYRelations1.GetStringSelection() != '') :
-                if (self.dropDownYRelations1.GetStringSelection() == 'ln(y)') :
-                    data['Y'] = math.log(data['Y'])
-                elif (self.dropDownYRelations1.GetStringSelection() == 'y^2') :
-                    data['Y'] = math.pow(data['Y'], 2)
-                elif (self.dropDownYRelations1.GetStringSelection() == 'sqrt(y)') :
-                    data['Y'] = math.pow(data['Y'], 0.5)
-                else :
-                    data['Y'] = data['Y']
+           # if(self.dropDownYRelations1.GetStringSelection() != '') :
+            #    if (self.dropDownYRelations1.GetStringSelection() == 'ln(y)') :
+             #       data['y'] = math.log(data['y'])
+              #  elif (self.dropDownYRelations1.GetStringSelection() == 'y^2') :
+               #     data['y'] = math.pow(data['y'], 2)
+                #elif (self.dropDownYRelations1.GetStringSelection() == 'sqrt(y)') :
+                 #   data['y'] = math.pow(data['y'], 0.5)
+               # else :
+                #    data['y'] = data['y']
 
             self.dataFrame = pd.DataFrame(data)
 
             
 if __name__ == '__main__':
-    ui = DypoleDatabaseViewer(None, title=''Database viewer'')
+    ui = DypoleDatabaseViewer(None, title='Database viewer')
     ui.app.MainLoop()
