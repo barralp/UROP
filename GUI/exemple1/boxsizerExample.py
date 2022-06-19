@@ -75,9 +75,11 @@ class DypoleDatabaseViewer(wx.Frame):
 
         self.updateButton = wx.Button(self.basePanel, wx.ID_ANY, 'Check for new data')
         self.textBox = wx.TextCtrl(self.basePanel)
-        self.buttonStatus = 0
+        #self.textForPointCount = wx.StaticText(self, label = '# of points to take from database')
+        self.updateDataButtonStatus = 0
 
         self.BoxSizer22.Add(self.updateButton, flag=wx.ALL|wx.EXPAND, border=5)
+        #self.BoxSizer22.Add(self.textForPointCount, flag=wx.ALL|wx.EXPAND, border=5)
         self.BoxSizer22.Add(self.textBox, flag=wx.ALL|wx.EXPAND, border=5)
 
         self.updateButton.Bind(wx.EVT_BUTTON, self.checkNewData)
@@ -91,25 +93,23 @@ class DypoleDatabaseViewer(wx.Frame):
         self.basePanel.SetSizer(self.mainWindowBoxSizer)
     
     def helloFunction(self) :
-        while(self.buttonStatus == 1) :
+        while(self.updateDataButtonStatus == 1) :
             time.sleep(2)
             print('hello')
 
     def checkNewData(self, event) : # rename variables to make them more clear
         try :
-            if (self.buttonStatus == 0) : # case where new data is being taken
-                self.buttonStatus = 1
-                self.t1.start()
-                print(self.buttonStatus)
-            elif (self.buttonStatus == 1) : # case where existing data is used
-                print('trying to join')
-                self.buttonStatus = 0
-                self.t1.join()
+            if (self.updateDataButtonStatus == 0) : # case where new data is being taken
+                self.updateDataButtonStatus = 1
+                self.checkForDataThread.start()
+                print(self.updateDataButtonStatus)
+            elif (self.updateDataButtonStatus == 1) : # case where existing data is used
+                self.updateDataButtonStatus = 0
+                self.checkForDataThread.join()
                 time.sleep(3)
-                print('done')
         except AttributeError :
-            self.t1 = threading.Thread(target=self.helloFunction)
-            self.buttonStatus = 0 
+            self.checkForDataThread = threading.Thread(target=self.helloFunction)
+            self.updateDataButtonStatus = 0 
             self.checkNewData(0)
         time.sleep(2)
 
