@@ -66,13 +66,13 @@ def getEntireColumn(variable, table):
     #put into dataframe where column name is variable
 
 #def get
-def getLastFiftyPoints(variable, table) :
-    sql_query = """"SELECT""" + variable + " FROM " + table + ";"
+def getLastXPoints(variable, table, numberOfPoints) :
+    sql_query = """"SELECT""" + variable + " FROM " + table + " DESC LIMIT " + str(numberOfPoints) + ";"
     return getQuery(sql_query)
 
 #def updatePoints(data) :
  #   if getLastImageID() != 
-  #      data.__add
+  #      data.__add, 
 
 def getLastImageID():
     sql_query = """SELECT imageID FROM images ORDER BY imageID DESC LIMIT 1;"""

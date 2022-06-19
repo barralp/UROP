@@ -8,17 +8,14 @@ import sys
 # i found the following version more portable
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(sys.path[0])),'database')) # goes 2 level up
 from communicate_database import getEntireColumn
-from communicate_database import getVariableList#, getLastImageID
+from communicate_database import getVariableList, getLastImageID, getLastXPoints
 import matplotlib
-import numpy
 import wx
 import wx.lib.scrolledpanel
 import numpy as np
 import pandas as pd
 import threading
-import time 
-import logging 
-import math
+import time
 
 matplotlib.use('WXAgg')
 
@@ -42,19 +39,6 @@ class DypoleDatabaseViewer(wx.Frame):
         self.graph1.updateData()
         self.graph2.updateData()
         self.graph3.updateData()
-        
-    #def copyDataFrame(self) :
-    ##if __name__ == '__main__' :
-      ##  t1 = threading.Thread(target=updateDropDown())
-        #t2 = threading.Thread(target=checkForNewData())
-
-        #t1.start()
-        #t2.start()
-
-      #  t1.join()
-       # t2.join()
-
-        #logging.info('Done!')
 
     def InitUI(self):
         self.basePanel = wx.lib.scrolledpanel.ScrolledPanel(self, id = -1, size = (1,1))
@@ -90,7 +74,13 @@ class DypoleDatabaseViewer(wx.Frame):
         self.BoxSizer22 = wx.StaticBoxSizer(self.Box22, wx.HORIZONTAL)
 
         self.updateButton = wx.Button(self.basePanel, wx.ID_ANY, 'Check for new data')
+        self.textBox = wx.TextCtrl(self.basePanel)
+        self.buttonStatus = 0
+
         self.BoxSizer22.Add(self.updateButton, flag=wx.ALL|wx.EXPAND, border=5)
+        self.BoxSizer22.Add(self.textBox, flag=wx.ALL|wx.EXPAND, border=5)
+
+        self.updateButton.Bind(wx.EVT_BUTTON, self.checkNewData)
 
         self.secondRowBoxSizer.Add(self.BoxSizer21)
         self.secondRowBoxSizer.Add(self.BoxSizer22)
@@ -99,7 +89,29 @@ class DypoleDatabaseViewer(wx.Frame):
         self.mainWindowBoxSizer.Add(self.secondRowBoxSizer)
         
         self.basePanel.SetSizer(self.mainWindowBoxSizer)
-        
+    
+    def helloFunction(self) :
+        while(self.buttonStatus == 1) :
+            time.sleep(2)
+            print('hello')
+
+    def checkNewData(self, event) : # rename variables to make them more clear
+        try :
+            if (self.buttonStatus == 0) : # case where new data is being taken
+                self.buttonStatus = 1
+                self.t1.start()
+                print(self.buttonStatus)
+            elif (self.buttonStatus == 1) : # case where existing data is used
+                print('trying to join')
+                self.buttonStatus = 0
+                self.t1.join()
+                time.sleep(3)
+                print('done')
+        except AttributeError :
+            self.t1 = threading.Thread(target=self.helloFunction)
+            self.buttonStatus = 0 
+            self.checkNewData(0)
+        time.sleep(2)
 
 class PlotPanel(wx.Panel):
     def __init__(self, parent):
@@ -181,6 +193,9 @@ class PlotPanel(wx.Panel):
         self.dropDownXRelations1 = wx.ComboBox(self, choices = relationsX)
         self.dropDownYRelations1 = wx.ComboBox(self, choices = relationsY)
         
+        self.dropDownXRelations1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
+        self.dropDownYRelations1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
+        
         self.xBoxSizer.Add(self.textX1)
         self.xBoxSizer.Add(self.dropDownX1)
         self.xBoxSizer.Add(self.textXRelations)
@@ -200,10 +215,13 @@ class PlotPanel(wx.Panel):
     def checkForNewData(self) :
         while True:
             time.sleep(2)
+            # change this so that the image id can be used to pull the next point
             lenX = len(getEntireColumn(self.dropDownX1.GetStringSelection(), 'ciceroOut'))
             lenY = len(getEntireColumn(self.dropDownY1.GetStringSelection(), 'ciceroOut'))
 
-            if len(self.dataFrame['Y']) != lenX and len(self.dataFrame['X']) != lenY :
+            lastImageID = 0
+
+            if lastImageID != getLastImageID() :
                 self.dataFrame['Y'].append(getEntireColumn(self.dropDownY1.GetStringSelection(), 'ciceroOut')[lenX - 1])
                 self.dataFrame['X'].append(getEntireColumn(self.dropDownX1.GetStringSelection(), 'ciceroOut')[lenY - 1])
 
@@ -214,29 +232,29 @@ class PlotPanel(wx.Panel):
             data = {
                 'x' : getEntireColumn(self.dropDownX1.GetStringSelection(), 'ciceroOut'),
                 'y' : getEntireColumn(self.dropDownY1.GetStringSelection(), 'ciceroOut')
+                #'imageIDs' : getEntireColumn()
             }
-            #if (self.dropDownXRelations1.GetStringSelection() != '') :
-             #   if (self.dropDownXRelations1.GetStringSelection() == 'ln(x)') :
-              #      data['x'] = math.log(data['x'])
-               # elif (self.dropDownXRelations1.GetStringSelection() == 'x^2') :
-                #    data['x'] = math.pow(data['x'], 2)
-               # elif (self.dropDownXRelations1.GetStringSelection() == 'sqrt(x)') :
-                #    data['x'] = math.pow(data['x'], 0.5)
-                #else : 
-                 #   data['x'] = data['x']
+            if (self.dropDownXRelations1.GetStringSelection() != '') :
+                if (self.dropDownXRelations1.GetStringSelection() == 'ln(x)') :
+                    data['x'] = np.log(data['x'])
+                elif (self.dropDownXRelations1.GetStringSelection() == 'x^2') :
+                    data['x'] = np.power(data['x'], 2)
+                elif (self.dropDownXRelations1.GetStringSelection() == 'sqrt(x)') :
+                    data['x'] = np.power(data['x'], 0.5)
+                else : 
+                    data['x'] = data['x']
             
-           # if(self.dropDownYRelations1.GetStringSelection() != '') :
-            #    if (self.dropDownYRelations1.GetStringSelection() == 'ln(y)') :
-             #       data['y'] = math.log(data['y'])
-              #  elif (self.dropDownYRelations1.GetStringSelection() == 'y^2') :
-               #     data['y'] = math.pow(data['y'], 2)
-                #elif (self.dropDownYRelations1.GetStringSelection() == 'sqrt(y)') :
-                 #   data['y'] = math.pow(data['y'], 0.5)
-               # else :
-                #    data['y'] = data['y']
+            if(self.dropDownYRelations1.GetStringSelection() != '') :
+                if (self.dropDownYRelations1.GetStringSelection() == 'ln(y)') :
+                    data['y'] = np.log(data['y'])
+                elif (self.dropDownYRelations1.GetStringSelection() == 'y^2') :
+                    data['y'] = np.power(data['y'], 2)
+                elif (self.dropDownYRelations1.GetStringSelection() == 'sqrt(y)') :
+                    data['y'] = np.power(data['y'], 0.5)
+                else :
+                    data['y'] = data['y']
 
             self.dataFrame = pd.DataFrame(data)
-
             
 if __name__ == '__main__':
     ui = DypoleDatabaseViewer(None, title='Database viewer')
