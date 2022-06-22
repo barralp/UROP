@@ -33,12 +33,11 @@ class DypoleDatabaseViewer(wx.Frame):
         self.Centre()
         self.Show()
 
-    #def modifyDataframe(self, xVar, yVar) :
-
-    def updateData(self) :
-        self.graph1.updateData()
-        self.graph2.updateData()
-        self.graph3.updateData()
+    def checkForNewData(self) :
+        while (True) :
+            self.graph1.checkForNewData()
+            self.graph2.checkForNewData()
+            self.graph3.checkForNewData()
 
     def InitUI(self):
         self.basePanel = wx.lib.scrolledpanel.ScrolledPanel(self, id = -1, size = (1,1))
@@ -73,16 +72,17 @@ class DypoleDatabaseViewer(wx.Frame):
         self.Box22 = wx.StaticBox(self.basePanel, label='Control box')
         self.BoxSizer22 = wx.StaticBoxSizer(self.Box22, wx.HORIZONTAL)
 
-        self.updateButton = wx.Button(self.basePanel, wx.ID_ANY, 'Check for new data')
+        self.updateDataButton = wx.Button(self.basePanel, wx.ID_ANY, 'Check for new data')
+        self.updateDataButton.SetBackgroundColour((255, 230, 200, 255))
         self.textBox = wx.TextCtrl(self.basePanel)
-        #self.textForPointCount = wx.StaticText(self, label = '# of points to take from database')
+        self.textForPointCount = wx.StaticText(self.basePanel, label = '# of points to take from database')
         self.updateDataButtonStatus = 0
 
-        self.BoxSizer22.Add(self.updateButton, flag=wx.ALL|wx.EXPAND, border=5)
-        #self.BoxSizer22.Add(self.textForPointCount, flag=wx.ALL|wx.EXPAND, border=5)
+        self.BoxSizer22.Add(self.updateDataButton, flag=wx.ALL|wx.EXPAND, border=5)
+        self.BoxSizer22.Add(self.textForPointCount, flag=wx.ALL|wx.EXPAND, border=5)
         self.BoxSizer22.Add(self.textBox, flag=wx.ALL|wx.EXPAND, border=5)
 
-        self.updateButton.Bind(wx.EVT_BUTTON, self.checkNewData)
+        self.updateDataButton.Bind(wx.EVT_BUTTON, self.checkNewData)
 
         self.secondRowBoxSizer.Add(self.BoxSizer21)
         self.secondRowBoxSizer.Add(self.BoxSizer22)
@@ -101,14 +101,16 @@ class DypoleDatabaseViewer(wx.Frame):
         try :
             if (self.updateDataButtonStatus == 0) : # case where new data is being taken
                 self.updateDataButtonStatus = 1
+                self.updateDataButton.SetBackgroundColour((0, 0, 200, 255)) # button is blue when new data is being checked for 
                 self.checkForDataThread.start()
                 print(self.updateDataButtonStatus)
             elif (self.updateDataButtonStatus == 1) : # case where existing data is used
                 self.updateDataButtonStatus = 0
+                self.updateDataButton.SetBackgroundColour((255, 230, 200, 255)) # button is red when taking old data
                 self.checkForDataThread.join()
                 time.sleep(3)
         except AttributeError :
-            self.checkForDataThread = threading.Thread(target=self.helloFunction)
+            self.checkForDataThread = threading.Thread(target=self.checkForNewData)
             self.updateDataButtonStatus = 0 
             self.checkNewData(0)
         time.sleep(2)
@@ -162,7 +164,6 @@ class PlotPanel(wx.Panel):
         if (dropDownY != '' and dropDownX != '') :
             self.changeVar()
             self.axes.plot(self.dataFrame['x'], self.dataFrame['y'], marker ='o', ls='')
-            #self.axes.plot([],[])
         else :
             self.axes.plot([],[])
         self.canvas.draw()
@@ -177,7 +178,7 @@ class PlotPanel(wx.Panel):
         self.textY1 = wx.StaticText(self, label = 'Y Variable')
     
         varsX = getVariableList('ciceroOut')
-        varsY = getVariableList('ciceroOut')
+        varsY = getVariableList('nCounts')
         relationsX = ['x', 'ln(x)', 'x^2', 'sqrt(x)']
         relationsY = ['y', 'ln(y)', 'y^2', 'sqrt(y)']
         
@@ -209,30 +210,23 @@ class PlotPanel(wx.Panel):
         self.menuBoxSizer.Add(self.yBoxSizer)
         self.updateDropDown(0)
 
-    def updateData(self) :
-        self.changeVar()
-
+    # This will be the function that is used to check to see if there is new data in the database and adds it
     def checkForNewData(self) :
-        while True:
-            time.sleep(2)
-            # change this so that the image id can be used to pull the next point
-            lenX = len(getEntireColumn(self.dropDownX1.GetStringSelection(), 'ciceroOut'))
-            lenY = len(getEntireColumn(self.dropDownY1.GetStringSelection(), 'ciceroOut'))
+        time.sleep(2)
+        lastImageID = 0 # figure out how to base 
 
-            lastImageID = 0
+        if self.dropDownX1 != '' and self.dropDownY1 != '' and lastImageID != getLastImageID() :
+            self.dataFrame['y'].append(getLastXPoints(self.dropDownY1.GetStringSelection(), 'nCounts', 1, "runID_fk"))
+            self.dataFrame['x'].append(getLastXPoints(self.dropDownX1.GetStringSelection(), 'ciceroOut', 1, "runID"))
 
-            if lastImageID != getLastImageID() :
-                self.dataFrame['Y'].append(getEntireColumn(self.dropDownY1.GetStringSelection(), 'ciceroOut')[lenX - 1])
-                self.dataFrame['X'].append(getEntireColumn(self.dropDownX1.GetStringSelection(), 'ciceroOut')[lenY - 1])
-
-    
-    def changeVar(self) :
+    # This function will eventually use the number of data points to only get the last couple entries 
+    def changeVar(self) :#, numberOfDataPoints) :
         if (self.dropDownX1.GetStringSelection() != '' and self.dropDownY1.GetStringSelection() != '') :
             self.dataFrame.drop(columns=['x', 'y'], inplace=True)
             data = {
-                'x' : getEntireColumn(self.dropDownX1.GetStringSelection(), 'ciceroOut'),
-                'y' : getEntireColumn(self.dropDownY1.GetStringSelection(), 'ciceroOut')
-                #'imageIDs' : getEntireColumn()
+                'x' : getLastXPoints(self.dropDownX1.GetStringSelection(), 'ciceroOut', 50, "runID"),
+                'y' : getLastXPoints(self.dropDownY1.GetStringSelection(), 'nCounts', 50, "runID_fk")
+                #'imageID' : getEntireColumn('imageID', 'images')
             }
             if (self.dropDownXRelations1.GetStringSelection() != '') :
                 if (self.dropDownXRelations1.GetStringSelection() == 'ln(x)') :

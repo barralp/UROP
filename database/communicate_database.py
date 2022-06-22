@@ -61,18 +61,14 @@ def getQuery(sql_query):
     return np.array(listOut, dtype = np.float64)[:,0]
 
 def getEntireColumn(variable, table):
-    sql_query = """SELECT """ + variable + " FROM " + table + ";"
+    sql_query = "SELECT " + variable + " FROM " + table + ";"
     return getQuery(sql_query)
     #put into dataframe where column name is variable
 
 #def get
-def getLastXPoints(variable, table, numberOfPoints) :
-    sql_query = """"SELECT""" + variable + " FROM " + table + " DESC LIMIT " + str(numberOfPoints) + ";"
+def getLastXPoints(variable, table, numberOfPoints, typeID) :
+    sql_query = "SELECT " + variable + " FROM " + table + " ORDER BY " + typeID + " DESC LIMIT " + str(numberOfPoints) + ";"
     return getQuery(sql_query)
-
-#def updatePoints(data) :
- #   if getLastImageID() != 
-  #      data.__add, 
 
 def getLastImageID():
     sql_query = """SELECT imageID FROM images ORDER BY imageID DESC LIMIT 1;"""
