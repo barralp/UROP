@@ -163,12 +163,12 @@ class PlotPanel(wx.Panel):
     
     def updateDropDown(self, event) :
         self.axes.cla()
-        dropDownX = self.dropDownX1.GetStringSelection()
-        dropDownY = self.dropDownY1.GetStringSelection()
+        dropDownX = self.getDropDownSelection()[0]
+        dropDownY = self.getDropDownSelection()[1]
         self.axes.set_title(dropDownX + ' vs. ' + dropDownY) 
         self.axes.set_xlabel(dropDownX)
         self.axes.set_ylabel(dropDownY)
-        if (dropDownY != '' and dropDownX != '') :
+        if (dropDownX != '' and dropDownY != '') :
             self.changeVar()
             self.axes.plot(self.dataFrame['x'], self.dataFrame['y'], marker ='o', ls='')
         else :
@@ -238,26 +238,26 @@ class PlotPanel(wx.Panel):
 
     # This will be the function that is used to check to see if there is new data in the database and adds it
     def checkForNewData(self) :
-        if self.dropDownX1.GetStringSelection() != '' and self.dropDownY1.GetStringSelection() != '' :
+        if self.getDropDownSelection()[0] != '' and self.getDropDownSelection()[1] != '' :
             print(self.dataFrame)
             lastRunID_fk = self.dataFrame['runID_fk'].iloc[-1]
             lastRunID_fk_dataBase = getLastXPoints('runID_fk', 'nCounts', 1, "runID_fk")[0]
             if lastRunID_fk != lastRunID_fk_dataBase :
-                print(lastRunID_fk)
-                print(lastRunID_fk_dataBase)
-                varX = getLastXPoints(self.dropDownY1.GetStringSelection(), 'nCounts', 1, 'runID_fk')
-                varY = getLastXPoints(self.dropDownX1.GetStringSelection(), 'ciceroOut', 1, 'runID')
+                #print(lastRunID_fk)
+                #print(lastRunID_fk_dataBase)
+                varX = getLastXPoints(self.getDropDownSelection()[0], 'ciceroOut', 1, 'runID')
+                varY = getLastXPoints(self.getDropDownSelection()[1], 'nCounts', 1, 'runID_fk')
                 lastRunID_fk = getLastXPoints('runID_fk', 'nCounts', 1, 'runID_fk')
                 self.dataFrame.append({'x' : varX, 'y' : varY, 'runID_fk' : lastRunID_fk}, ignore_index=True)
                 print(self.dataFrame)
 
     # This function will eventually use the number of data points to only get the last couple entries 
     def changeVar(self) :
-        if (self.dropDownX1.GetStringSelection() != '' and self.dropDownY1.GetStringSelection() != '') :
+        if (self.getDropDownSelection()[0] != '' and self.getDropDownSelection()[1] != '') :
             self.dataFrame.drop(columns=['x', 'y'], inplace=True)
             data = {
-                'x' : getLastXPoints(self.dropDownX1.GetStringSelection(), 'ciceroOut', self.numberOfPoints, "runID"),
-                'y' : getLastXPoints(self.dropDownY1.GetStringSelection(), 'nCounts', self.numberOfPoints, "runID_fk"),
+                'x' : getLastXPoints(self.getDropDownSelection()[0], 'ciceroOut', self.numberOfPoints, "runID"),
+                'y' : getLastXPoints(self.getDropDownSelection()[1], 'nCounts', self.numberOfPoints, "runID_fk"),
                 'runID_fk' :getLastXPoints('runID_fk', 'nCounts', self.numberOfPoints, "runID_fk")
             }
             if (self.dropDownXRelations1.GetStringSelection() != '') :
