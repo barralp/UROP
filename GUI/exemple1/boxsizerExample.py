@@ -34,10 +34,19 @@ class DypoleDatabaseViewer(wx.Frame):
         self.Show()
 
     def checkForNewData(self) :
+        self.graph1.axes.cla()
+        self.graph2.axes.cla()
+        self.graph3.axes.cla()
         while (True) :
+            time.sleep(2)
             self.graph1.checkForNewData()
             self.graph2.checkForNewData()
             self.graph3.checkForNewData()
+
+    def updatePointCount(self) :
+        self.graph1.updateNumberOfPoints(self.numberOfPointsTextBox.GetValue())
+        self.graph2.updateNumberOfPoints(self.numberOfPointsTextBox.GetValue())
+        self.graph3.updateNumberOfPoints(self.numberOfPointsTextBox.GetValue())
 
     def InitUI(self):
         self.basePanel = wx.lib.scrolledpanel.ScrolledPanel(self, id = -1, size = (1,1))
@@ -74,13 +83,15 @@ class DypoleDatabaseViewer(wx.Frame):
 
         self.updateDataButton = wx.Button(self.basePanel, wx.ID_ANY, 'Check for new data')
         self.updateDataButton.SetBackgroundColour((255, 230, 200, 255))
-        self.textBox = wx.TextCtrl(self.basePanel)
+        self.numberOfPointsTextBox = wx.TextCtrl(self.basePanel)
         self.textForPointCount = wx.StaticText(self.basePanel, label = '# of points to take from database')
         self.updateDataButtonStatus = 0
 
+        self.numberOfPointsTextBox.Bind(wx.EVT_COMMAND_ENTER, self.updatePointCount)
+
         self.BoxSizer22.Add(self.updateDataButton, flag=wx.ALL|wx.EXPAND, border=5)
         self.BoxSizer22.Add(self.textForPointCount, flag=wx.ALL|wx.EXPAND, border=5)
-        self.BoxSizer22.Add(self.textBox, flag=wx.ALL|wx.EXPAND, border=5)
+        self.BoxSizer22.Add(self.numberOfPointsTextBox, flag=wx.ALL|wx.EXPAND, border=5)
 
         self.updateDataButton.Bind(wx.EVT_BUTTON, self.checkNewData)
 
@@ -91,17 +102,12 @@ class DypoleDatabaseViewer(wx.Frame):
         self.mainWindowBoxSizer.Add(self.secondRowBoxSizer)
         
         self.basePanel.SetSizer(self.mainWindowBoxSizer)
-    
-    def helloFunction(self) :
-        while(self.updateDataButtonStatus == 1) :
-            time.sleep(2)
-            print('hello')
 
     def checkNewData(self, event) : # rename variables to make them more clear
         try :
             if (self.updateDataButtonStatus == 0) : # case where new data is being taken
                 self.updateDataButtonStatus = 1
-                self.updateDataButton.SetBackgroundColour((0, 0, 200, 255)) # button is blue when new data is being checked for 
+                self.updateDataButton.SetBackgroundColour((0, 100, 200, 255)) # button is blue when new data is being checked for 
                 self.checkForDataThread.start()
                 print(self.updateDataButtonStatus)
             elif (self.updateDataButtonStatus == 1) : # case where existing data is used
@@ -121,7 +127,8 @@ class PlotPanel(wx.Panel):
         self.initPlotPanel()
         data = {
             'x' : [],
-            'y' : []
+            'y' : [],
+            'runID_fk' : []
         }
         self.dataFrame = pd.DataFrame(data)
     
@@ -173,6 +180,8 @@ class PlotPanel(wx.Panel):
         self.xBoxSizer = wx.StaticBoxSizer(self.xBox, wx.VERTICAL)
         self.yBox = wx.StaticBox(self, label='Y parameters')
         self.yBoxSizer = wx.StaticBoxSizer(self.yBox, wx.VERTICAL)
+
+        self.numberOfPoints = 50
         
         self.textX1 = wx.StaticText(self, label = 'X Variable')
         self.textY1 = wx.StaticText(self, label = 'Y Variable')
@@ -196,6 +205,10 @@ class PlotPanel(wx.Panel):
         
         self.dropDownXRelations1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
         self.dropDownYRelations1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
+
+        self.copyGraphData = wx.Button(self, wx.ID_ANY, 'Copy Graph Data')
+
+        self.copyGraphData.Bind(wx.EVT_BUTTON, self.copyData)
         
         self.xBoxSizer.Add(self.textX1)
         self.xBoxSizer.Add(self.dropDownX1)
@@ -205,28 +218,47 @@ class PlotPanel(wx.Panel):
         self.yBoxSizer.Add(self.dropDownY1)
         self.yBoxSizer.Add(self.textYRelations)
         self.yBoxSizer.Add(self.dropDownYRelations1)
+        self.xBoxSizer.Add(self.copyGraphData)
         
         self.menuBoxSizer.Add(self.xBoxSizer)
         self.menuBoxSizer.Add(self.yBoxSizer)
         self.updateDropDown(0)
 
+    def copyData(self, event) :
+        self.dataFrame.to_clipboard()
+
+    # updates the number of points to be displayed
+    def updateNumberOfPoints(self, pointCount) :
+        self.numberOfPoints = pointCount
+
+    def getDropDownSelection(self) :
+        dropDownX1 = self.dropDownX1.GetStringSelection()
+        dropDownY1 = self.dropDownY1.GetStringSelection()
+        return [dropDownX1, dropDownY1]
+
     # This will be the function that is used to check to see if there is new data in the database and adds it
     def checkForNewData(self) :
-        time.sleep(2)
-        lastImageID = 0 # figure out how to base 
-
-        if self.dropDownX1 != '' and self.dropDownY1 != '' and lastImageID != getLastImageID() :
-            self.dataFrame['y'].append(getLastXPoints(self.dropDownY1.GetStringSelection(), 'nCounts', 1, "runID_fk"))
-            self.dataFrame['x'].append(getLastXPoints(self.dropDownX1.GetStringSelection(), 'ciceroOut', 1, "runID"))
+        if self.dropDownX1.GetStringSelection() != '' and self.dropDownY1.GetStringSelection() != '' :
+            print(self.dataFrame)
+            lastRunID_fk = self.dataFrame['runID_fk'].iloc[-1]
+            lastRunID_fk_dataBase = getLastXPoints('runID_fk', 'nCounts', 1, "runID_fk")[0]
+            if lastRunID_fk != lastRunID_fk_dataBase :
+                print(lastRunID_fk)
+                print(lastRunID_fk_dataBase)
+                varX = getLastXPoints(self.dropDownY1.GetStringSelection(), 'nCounts', 1, 'runID_fk')
+                varY = getLastXPoints(self.dropDownX1.GetStringSelection(), 'ciceroOut', 1, 'runID')
+                lastRunID_fk = getLastXPoints('runID_fk', 'nCounts', 1, 'runID_fk')
+                self.dataFrame.append({'x' : varX, 'y' : varY, 'runID_fk' : lastRunID_fk}, ignore_index=True)
+                print(self.dataFrame)
 
     # This function will eventually use the number of data points to only get the last couple entries 
-    def changeVar(self) :#, numberOfDataPoints) :
+    def changeVar(self) :
         if (self.dropDownX1.GetStringSelection() != '' and self.dropDownY1.GetStringSelection() != '') :
             self.dataFrame.drop(columns=['x', 'y'], inplace=True)
             data = {
-                'x' : getLastXPoints(self.dropDownX1.GetStringSelection(), 'ciceroOut', 50, "runID"),
-                'y' : getLastXPoints(self.dropDownY1.GetStringSelection(), 'nCounts', 50, "runID_fk")
-                #'imageID' : getEntireColumn('imageID', 'images')
+                'x' : getLastXPoints(self.dropDownX1.GetStringSelection(), 'ciceroOut', self.numberOfPoints, "runID"),
+                'y' : getLastXPoints(self.dropDownY1.GetStringSelection(), 'nCounts', self.numberOfPoints, "runID_fk"),
+                'runID_fk' :getLastXPoints('runID_fk', 'nCounts', self.numberOfPoints, "runID_fk")
             }
             if (self.dropDownXRelations1.GetStringSelection() != '') :
                 if (self.dropDownXRelations1.GetStringSelection() == 'ln(x)') :

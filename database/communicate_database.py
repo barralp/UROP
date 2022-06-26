@@ -65,7 +65,6 @@ def getEntireColumn(variable, table):
     return getQuery(sql_query)
     #put into dataframe where column name is variable
 
-#def get
 def getLastXPoints(variable, table, numberOfPoints, typeID) :
     sql_query = "SELECT " + variable + " FROM " + table + " ORDER BY " + typeID + " DESC LIMIT " + str(numberOfPoints) + ";"
     return getQuery(sql_query)
