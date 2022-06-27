@@ -107,7 +107,7 @@ class DypoleDatabaseViewer(wx.Frame):
         try :
             if (self.updateDataButtonStatus == 0) : # case where new data is being taken
                 self.updateDataButtonStatus = 1
-                self.updateDataButton.SetBackgroundColour((0, 100, 200, 255)) # button is blue when new data is being checked for 
+                self.updateDataButton.SetBackgroundColour((70, 100, 200, 255)) # button is blue when new data is being checked for 
                 self.checkForDataThread.start()
                 print(self.updateDataButtonStatus)
             elif (self.updateDataButtonStatus == 1) : # case where existing data is used
