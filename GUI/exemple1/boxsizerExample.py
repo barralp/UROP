@@ -43,10 +43,11 @@ class DypoleDatabaseViewer(wx.Frame):
             self.graph2.checkForNewData()
             self.graph3.checkForNewData()
 
-    def updatePointCount(self) :
-        self.graph1.updateNumberOfPoints(self.numberOfPointsTextBox.GetValue())
-        self.graph2.updateNumberOfPoints(self.numberOfPointsTextBox.GetValue())
-        self.graph3.updateNumberOfPoints(self.numberOfPointsTextBox.GetValue())
+    def updatePointCount(self, event) :
+        if int(self.numberOfPointsTextBox.GetValue()) > 0 :
+            self.graph1.updateNumberOfPoints(self.numberOfPointsTextBox.GetValue())
+            self.graph2.updateNumberOfPoints(self.numberOfPointsTextBox.GetValue())
+            self.graph3.updateNumberOfPoints(self.numberOfPointsTextBox.GetValue())
 
     def InitUI(self):
         self.basePanel = wx.lib.scrolledpanel.ScrolledPanel(self, id = -1, size = (1,1))
@@ -82,12 +83,12 @@ class DypoleDatabaseViewer(wx.Frame):
         self.BoxSizer22 = wx.StaticBoxSizer(self.Box22, wx.HORIZONTAL)
 
         self.updateDataButton = wx.Button(self.basePanel, wx.ID_ANY, 'Check for new data')
-        self.updateDataButton.SetBackgroundColour((255, 230, 200, 255))
+        self.updateDataButton.SetBackgroundColour((255, 230, 180, 255))
         self.numberOfPointsTextBox = wx.TextCtrl(self.basePanel)
         self.textForPointCount = wx.StaticText(self.basePanel, label = '# of points to take from database')
         self.updateDataButtonStatus = 0
 
-        self.numberOfPointsTextBox.Bind(wx.EVT_COMMAND_ENTER, self.updatePointCount)
+        self.numberOfPointsTextBox.Bind(wx.EVT_TEXT, self.updatePointCount)
 
         self.BoxSizer22.Add(self.updateDataButton, flag=wx.ALL|wx.EXPAND, border=5)
         self.BoxSizer22.Add(self.textForPointCount, flag=wx.ALL|wx.EXPAND, border=5)
@@ -106,13 +107,14 @@ class DypoleDatabaseViewer(wx.Frame):
     def checkNewData(self, event) : # rename variables to make them more clear
         try :
             if (self.updateDataButtonStatus == 0) : # case where new data is being taken
+                print(self.numberOfPointsTextBox.GetValue())
                 self.updateDataButtonStatus = 1
                 self.updateDataButton.SetBackgroundColour((70, 100, 200, 255)) # button is blue when new data is being checked for 
                 self.checkForDataThread.start()
                 print(self.updateDataButtonStatus)
             elif (self.updateDataButtonStatus == 1) : # case where existing data is used
                 self.updateDataButtonStatus = 0
-                self.updateDataButton.SetBackgroundColour((255, 230, 200, 255)) # button is red when taking old data
+                self.updateDataButton.SetBackgroundColour((230, 230, 200, 255)) # button is red when taking old data
                 self.checkForDataThread.join()
                 time.sleep(3)
         except AttributeError :
@@ -230,6 +232,7 @@ class PlotPanel(wx.Panel):
     # updates the number of points to be displayed
     def updateNumberOfPoints(self, pointCount) :
         self.numberOfPoints = pointCount
+        self.updateDropDown(0)
 
     def getDropDownSelection(self) :
         dropDownX1 = self.dropDownX1.GetStringSelection()
