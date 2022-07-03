@@ -34,9 +34,9 @@ class DypoleDatabaseViewer(wx.Frame):
         self.Show()
 
     def checkForNewData(self) :
-        self.graph1.axes.cla()
-        self.graph2.axes.cla()
-        self.graph3.axes.cla()
+        self.graph1.emptyDataBase()
+        self.graph2.emptyDataBase()
+        self.graph3.emptyDataBase()
         while (True) :
             time.sleep(2)
             self.graph1.checkForNewData()
@@ -44,7 +44,7 @@ class DypoleDatabaseViewer(wx.Frame):
             self.graph3.checkForNewData()
 
     def updatePointCount(self, event) :
-        if int(self.numberOfPointsTextBox.GetValue()) > 0 :
+        if self.numberOfPointsTextBox.GetValue().isdigit() and int(self.numberOfPointsTextBox.GetValue()) > 0 :
             self.graph1.updateNumberOfPoints(self.numberOfPointsTextBox.GetValue())
             self.graph2.updateNumberOfPoints(self.numberOfPointsTextBox.GetValue())
             self.graph3.updateNumberOfPoints(self.numberOfPointsTextBox.GetValue())
@@ -177,6 +177,12 @@ class PlotPanel(wx.Panel):
             self.axes.plot([],[])
         self.canvas.draw()
 
+    def setGraphBounds(self, event) :
+        #if self.upperLimitTextBoxX.GetValue().isdigit() :
+        
+        #else :
+        return 0
+
     def setUpMenu(self):
         self.xBox = wx.StaticBox(self, label='X parameters')
         self.xBoxSizer = wx.StaticBoxSizer(self.xBox, wx.VERTICAL)
@@ -211,6 +217,23 @@ class PlotPanel(wx.Panel):
         self.copyGraphData = wx.Button(self, wx.ID_ANY, 'Copy Graph Data')
 
         self.copyGraphData.Bind(wx.EVT_BUTTON, self.copyData)
+
+        self.lowerLimitTextY = wx.StaticText(self, label = 'Graph Lower Limit Y')
+        self.upperLimitTextY = wx.StaticText(self, label = 'Graph Upper Limit Y')
+
+        self.lowerLimitTextX = wx.StaticText(self, label = 'Graph Lower Limit X')
+        self.upperLimitTextX = wx.StaticText(self, label = 'Graph Upper Limit X')
+
+        self.lowerLimitTextBoxY = wx.TextCtrl(self)
+        self.upperLimitTextBoxY = wx.TextCtrl(self)
+
+        self.lowerLimitTextBoxX = wx.TextCtrl(self)
+        self.upperLimitTextBoxX = wx.TextCtrl(self)
+
+        self.lowerLimitTextY.Bind(wx.EVT_TEXT, self.setGraphBounds)
+        self.upperLimitTextY.Bind(wx.EVT_TEXT, self.setGraphBounds)
+        self.lowerLimitTextX.Bind(wx.EVT_TEXT, self.setGraphBounds)
+        self.upperLimitTextX.Bind(wx.EVT_TEXT, self.setGraphBounds)
         
         self.xBoxSizer.Add(self.textX1)
         self.xBoxSizer.Add(self.dropDownX1)
@@ -220,8 +243,18 @@ class PlotPanel(wx.Panel):
         self.yBoxSizer.Add(self.dropDownY1)
         self.yBoxSizer.Add(self.textYRelations)
         self.yBoxSizer.Add(self.dropDownYRelations1)
+
+        self.yBoxSizer.Add(self.lowerLimitTextY)
+        self.yBoxSizer.Add(self.lowerLimitTextBoxY)
+        self.yBoxSizer.Add(self.upperLimitTextY)
+        self.yBoxSizer.Add(self.upperLimitTextBoxY)
+        self.xBoxSizer.Add(self.lowerLimitTextX)
+        self.xBoxSizer.Add(self.lowerLimitTextBoxX)
+        self.xBoxSizer.Add(self.upperLimitTextX)
+        self.xBoxSizer.Add(self.upperLimitTextBoxX)
+
         self.xBoxSizer.Add(self.copyGraphData)
-        
+
         self.menuBoxSizer.Add(self.xBoxSizer)
         self.menuBoxSizer.Add(self.yBoxSizer)
         self.updateDropDown(0)
@@ -241,18 +274,25 @@ class PlotPanel(wx.Panel):
 
     # This will be the function that is used to check to see if there is new data in the database and adds it
     def checkForNewData(self) :
-        if self.getDropDownSelection()[0] != '' and self.getDropDownSelection()[1] != '' :
+        if self.getDropDownSelection()[0] != '' and self.getDropDownSelection()[1] != '' and len(self.dataFrame) != 0 :
             print(self.dataFrame)
             lastRunID_fk = self.dataFrame['runID_fk'].iloc[-1]
             lastRunID_fk_dataBase = getLastXPoints('runID_fk', 'nCounts', 1, "runID_fk")[0]
             if lastRunID_fk != lastRunID_fk_dataBase :
-                #print(lastRunID_fk)
-                #print(lastRunID_fk_dataBase)
-                varX = getLastXPoints(self.getDropDownSelection()[0], 'ciceroOut', 1, 'runID')
+                varX = getLastXPoints(self , 'ciceroOut', 1, 'runID')
                 varY = getLastXPoints(self.getDropDownSelection()[1], 'nCounts', 1, 'runID_fk')
                 lastRunID_fk = getLastXPoints('runID_fk', 'nCounts', 1, 'runID_fk')
                 self.dataFrame.append({'x' : varX, 'y' : varY, 'runID_fk' : lastRunID_fk}, ignore_index=True)
                 print(self.dataFrame)
+
+    def emptyDataBase(self) :
+        self.axes.cla()
+        data = {
+            'x' : getLastXPoints(self.getDropDownSelection()[0], 'ciceroOut', 1, 'runID'),
+            'y' : getLastXPoints(self.getDropDownSelection()[1], 'nCounts', 1, 'runID_fk'),
+            'runID_fk' : getLastXPoints('runID_fk', 'nCounts', 1, 'runID_fk')
+        }
+        self.dataFrame = pd.DataFrame(data)
 
     # This function will eventually use the number of data points to only get the last couple entries 
     def changeVar(self) :
