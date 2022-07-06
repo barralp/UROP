@@ -90,9 +90,12 @@ class DypoleDatabaseViewer(wx.Frame):
 
         self.numberOfPointsTextBox.Bind(wx.EVT_TEXT, self.updatePointCount)
 
+        self.saveImageButton = wx.Button(self.basePanel, wx.ID_ANY, 'Save All Graph Images')
+
         self.BoxSizer22.Add(self.updateDataButton, flag=wx.ALL|wx.EXPAND, border=5)
         self.BoxSizer22.Add(self.textForPointCount, flag=wx.ALL|wx.EXPAND, border=5)
         self.BoxSizer22.Add(self.numberOfPointsTextBox, flag=wx.ALL|wx.EXPAND, border=5)
+        self.BoxSizer22.Add(self.saveImageButton, flag=wx.ALL|wx.EXPAND, border=5)
 
         self.updateDataButton.Bind(wx.EVT_BUTTON, self.checkNewData)
 
@@ -184,10 +187,12 @@ class PlotPanel(wx.Panel):
         return 0
 
     def setUpMenu(self):
-        self.xBox = wx.StaticBox(self, label='X parameters')
+        self.xBox = wx.StaticBox(self, label='X Parameters')
         self.xBoxSizer = wx.StaticBoxSizer(self.xBox, wx.VERTICAL)
-        self.yBox = wx.StaticBox(self, label='Y parameters')
+        self.yBox = wx.StaticBox(self, label='Y Parameters')
         self.yBoxSizer = wx.StaticBoxSizer(self.yBox, wx.VERTICAL)
+        self.controlsBox = wx.StaticBox(self, label='Controls Box')
+        self.controlsBoxSizer = wx.StaticBoxSizer(self.controlsBox, wx.VERTICAL)
 
         self.numberOfPoints = 50
         
@@ -215,6 +220,7 @@ class PlotPanel(wx.Panel):
         self.dropDownYRelations1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
 
         self.copyGraphData = wx.Button(self, wx.ID_ANY, 'Copy Graph Data')
+        self.saveGraphData = wx.Button(self, wx.ID_ANY, 'Save Graph Image')
 
         self.copyGraphData.Bind(wx.EVT_BUTTON, self.copyData)
 
@@ -253,10 +259,13 @@ class PlotPanel(wx.Panel):
         self.xBoxSizer.Add(self.upperLimitTextX)
         self.xBoxSizer.Add(self.upperLimitTextBoxX)
 
-        self.xBoxSizer.Add(self.copyGraphData)
+        self.controlsBoxSizer.Add(self.copyGraphData)
+        self.controlsBoxSizer.Add(self.saveGraphData)
 
         self.menuBoxSizer.Add(self.xBoxSizer)
         self.menuBoxSizer.Add(self.yBoxSizer)
+        self.menuBoxSizer.Add(self.controlsBoxSizer)
+
         self.updateDropDown(0)
 
     def copyData(self, event) :
@@ -277,9 +286,9 @@ class PlotPanel(wx.Panel):
         if self.getDropDownSelection()[0] != '' and self.getDropDownSelection()[1] != '' and len(self.dataFrame) != 0 :
             print(self.dataFrame)
             lastRunID_fk = self.dataFrame['runID_fk'].iloc[-1]
-            lastRunID_fk_dataBase = getLastXPoints('runID_fk', 'nCounts', 1, "runID_fk")[0]
+            lastRunID_fk_dataBase = getLastXPoints('runID_fk', 'nCounts', 1, 'runID_fk')[0]
             if lastRunID_fk != lastRunID_fk_dataBase :
-                varX = getLastXPoints(self , 'ciceroOut', 1, 'runID')
+                varX = getLastXPoints(self.getDropDownSelection()[0], 'ciceroOut', 1, 'runID')
                 varY = getLastXPoints(self.getDropDownSelection()[1], 'nCounts', 1, 'runID_fk')
                 lastRunID_fk = getLastXPoints('runID_fk', 'nCounts', 1, 'runID_fk')
                 self.dataFrame.append({'x' : varX, 'y' : varY, 'runID_fk' : lastRunID_fk}, ignore_index=True)
@@ -301,7 +310,7 @@ class PlotPanel(wx.Panel):
             data = {
                 'x' : getLastXPoints(self.getDropDownSelection()[0], 'ciceroOut', self.numberOfPoints, "runID"),
                 'y' : getLastXPoints(self.getDropDownSelection()[1], 'nCounts', self.numberOfPoints, "runID_fk"),
-                'runID_fk' :getLastXPoints('runID_fk', 'nCounts', self.numberOfPoints, "runID_fk")
+                'runID_fk' : getLastXPoints('runID_fk', 'nCounts', self.numberOfPoints, "runID_fk")
             }
             if (self.dropDownXRelations1.GetStringSelection() != '') :
                 if (self.dropDownXRelations1.GetStringSelection() == 'ln(x)') :
