@@ -7,7 +7,6 @@ import os
 import sys
 # i found the following version more portable
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(sys.path[0])),'database')) # goes 2 level up
-from communicate_database import getEntireColumn
 from communicate_database import getVariableList, getLastImageID, getLastXPoints
 import matplotlib
 import wx
@@ -16,6 +15,7 @@ import numpy as np
 import pandas as pd
 import threading
 import time
+from datetime import date
 
 matplotlib.use('WXAgg')
 
@@ -28,6 +28,11 @@ class DypoleDatabaseViewer(wx.Frame):
         wx.Frame.__init__(self, parent, title = title, size = (1000, 500))
         self.start()
         
+    def saveGraphImage(self, event) :
+        self.graph1.saveDataImage(0)
+        self.graph2.saveDataImage(0)
+        self.graph3.saveDataImage(0)
+
     def start(self):
         self.InitUI()
         self.Centre()
@@ -91,6 +96,7 @@ class DypoleDatabaseViewer(wx.Frame):
         self.numberOfPointsTextBox.Bind(wx.EVT_TEXT, self.updatePointCount)
 
         self.saveImageButton = wx.Button(self.basePanel, wx.ID_ANY, 'Save All Graph Images')
+        self.saveImageButton.Bind(wx.EVT_BUTTON, self.saveGraphImage)
 
         self.BoxSizer22.Add(self.updateDataButton, flag=wx.ALL|wx.EXPAND, border=5)
         self.BoxSizer22.Add(self.textForPointCount, flag=wx.ALL|wx.EXPAND, border=5)
@@ -220,9 +226,10 @@ class PlotPanel(wx.Panel):
         self.dropDownYRelations1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
 
         self.copyGraphData = wx.Button(self, wx.ID_ANY, 'Copy Graph Data')
-        self.saveGraphData = wx.Button(self, wx.ID_ANY, 'Save Graph Image')
+        self.saveGraphImage = wx.Button(self, wx.ID_ANY, 'Save Graph Image')
 
         self.copyGraphData.Bind(wx.EVT_BUTTON, self.copyData)
+        self.saveGraphImage.Bind(wx.EVT_BUTTON, self.saveDataImage)
 
         self.lowerLimitTextY = wx.StaticText(self, label = 'Graph Lower Limit Y')
         self.upperLimitTextY = wx.StaticText(self, label = 'Graph Upper Limit Y')
@@ -260,13 +267,14 @@ class PlotPanel(wx.Panel):
         self.xBoxSizer.Add(self.upperLimitTextBoxX)
 
         self.controlsBoxSizer.Add(self.copyGraphData)
-        self.controlsBoxSizer.Add(self.saveGraphData)
+        self.controlsBoxSizer.Add(self.saveGraphImage)
 
         self.menuBoxSizer.Add(self.xBoxSizer)
         self.menuBoxSizer.Add(self.yBoxSizer)
         self.menuBoxSizer.Add(self.controlsBoxSizer)
 
         self.updateDropDown(0)
+
 
     def copyData(self, event) :
         self.dataFrame.to_clipboard()
@@ -297,11 +305,23 @@ class PlotPanel(wx.Panel):
     def emptyDataBase(self) :
         self.axes.cla()
         data = {
-            'x' : getLastXPoints(self.getDropDownSelection()[0], 'ciceroOut', 1, 'runID'),
-            'y' : getLastXPoints(self.getDropDownSelection()[1], 'nCounts', 1, 'runID_fk'),
-            'runID_fk' : getLastXPoints('runID_fk', 'nCounts', 1, 'runID_fk')
+            'x' : getLastXPoints(self.getDropDownSelection()[0], 'ciceroOut', self.numberOfPoints, 'runID'),
+            'y' : getLastXPoints(self.getDropDownSelection()[1], 'nCounts', self.numberOfPoints, 'runID_fk'),
+            'runID_fk' : getLastXPoints('runID_fk', 'nCounts', self.numberOfPoints, 'runID_fk')
         }
         self.dataFrame = pd.DataFrame(data)
+
+    def saveDataImage(self, event) :
+        width = 200 
+        height = 200
+        bmp = wx.Bitmap(width, height)
+        dc = wx.MemoryDC ()
+        dc.SelectObject(bmp)
+        today = date.today()
+        dateOfGraph = today.strftime("%Y-%b-%d")
+        if self.dropDownX1.GetStringSelection() != '' and self.dropDownY1.GetStringSelection() :
+            imageName = dateOfGraph + " " + self.dropDownX1.GetStringSelection() + " vs. " + self.dropDownY1.GetStringSelection()
+            bmp.SaveFile(imageName, wx.BITMAP_TYPE_BMP)
 
     # This function will eventually use the number of data points to only get the last couple entries 
     def changeVar(self) :
