@@ -42,11 +42,16 @@ class DypoleDatabaseViewer(wx.Frame):
         self.graph1.emptyDataBase()
         self.graph2.emptyDataBase()
         self.graph3.emptyDataBase()
-        while (True) :
+        while self.checkingData :
+            print('while in')
             time.sleep(2)
             self.graph1.checkForNewData()
+            print('graph 1')
             self.graph2.checkForNewData()
+            print('graph 2')
             self.graph3.checkForNewData()
+            print('while ')
+        print('exiting')
 
     def updatePointCount(self, event) :
         if self.numberOfPointsTextBox.GetValue().isdigit() and int(self.numberOfPointsTextBox.GetValue()) > 0 :
@@ -91,7 +96,7 @@ class DypoleDatabaseViewer(wx.Frame):
         self.updateDataButton.SetBackgroundColour((255, 230, 180, 255))
         self.numberOfPointsTextBox = wx.TextCtrl(self.basePanel)
         self.textForPointCount = wx.StaticText(self.basePanel, label = '# of points to take from database')
-        self.updateDataButtonStatus = 0
+        self.updateDataButtonStatus = False
 
         self.numberOfPointsTextBox.Bind(wx.EVT_TEXT, self.updatePointCount)
 
@@ -112,23 +117,29 @@ class DypoleDatabaseViewer(wx.Frame):
         self.mainWindowBoxSizer.Add(self.secondRowBoxSizer)
         
         self.basePanel.SetSizer(self.mainWindowBoxSizer)
+        self.checkingData = False
 
     def checkNewData(self, event) : # rename variables to make them more clear
         try :
-            if (self.updateDataButtonStatus == 0) : # case where new data is being taken
+            if not self.updateDataButtonStatus : # case where new data is being taken
                 print(self.numberOfPointsTextBox.GetValue())
-                self.updateDataButtonStatus = 1
+                self.updateDataButtonStatus = True
                 self.updateDataButton.SetBackgroundColour((70, 100, 200, 255)) # button is blue when new data is being checked for 
                 self.checkForDataThread.start()
+                self.checkingData = True
                 print(self.updateDataButtonStatus)
-            elif (self.updateDataButtonStatus == 1) : # case where existing data is used
-                self.updateDataButtonStatus = 0
+            elif self.updateDataButtonStatus : # case where existing data is used
+                self.updateDataButtonStatus = False
                 self.updateDataButton.SetBackgroundColour((230, 230, 200, 255)) # button is red when taking old data
-                self.checkForDataThread.join()
-                time.sleep(3)
+                print('before')
+                self.checkingData = False
+                time.sleep(10)
+                #self.checkForDataThread.join()
+                print('after')
+                time.sleep(1)
         except AttributeError :
             self.checkForDataThread = threading.Thread(target=self.checkForNewData)
-            self.updateDataButtonStatus = 0 
+            self.updateDataButtonStatus = False
             self.checkNewData(0)
         time.sleep(2)
 
@@ -291,8 +302,9 @@ class PlotPanel(wx.Panel):
 
     # This will be the function that is used to check to see if there is new data in the database and adds it
     def checkForNewData(self) :
+        print(self)
         if self.getDropDownSelection()[0] != '' and self.getDropDownSelection()[1] != '' and len(self.dataFrame) != 0 :
-            print(self.dataFrame)
+            #print(self.dataFrame)
             lastRunID_fk = self.dataFrame['runID_fk'].iloc[-1]
             lastRunID_fk_dataBase = getLastXPoints('runID_fk', 'nCounts', 1, 'runID_fk')[0]
             if lastRunID_fk != lastRunID_fk_dataBase :
@@ -300,18 +312,24 @@ class PlotPanel(wx.Panel):
                 varY = getLastXPoints(self.getDropDownSelection()[1], 'nCounts', 1, 'runID_fk')
                 lastRunID_fk = getLastXPoints('runID_fk', 'nCounts', 1, 'runID_fk')
                 self.dataFrame.append({'x' : varX, 'y' : varY, 'runID_fk' : lastRunID_fk}, ignore_index=True)
-                print(self.dataFrame)
+                #print(self.dataFrame)
+        elif self.getDropDownSelection()[0] != '' and self.getDropDownSelection()[1] != '' and len(self.dataFrame) == 0 :
+            varX = getLastXPoints(self.getDropDownSelection()[0], 'ciceroOut', 1, 'runID')
+            varY = getLastXPoints(self.getDropDownSelection()[1], 'nCounts', 1, 'runID_fk')
+            lastRunID_fk = getLastXPoints('runID_fk', 'nCounts', 1, 'runID_fk')
+        print(self)
 
     def emptyDataBase(self) :
         self.axes.cla()
-        data = {
-            'x' : getLastXPoints(self.getDropDownSelection()[0], 'ciceroOut', self.numberOfPoints, 'runID'),
-            'y' : getLastXPoints(self.getDropDownSelection()[1], 'nCounts', self.numberOfPoints, 'runID_fk'),
-            'runID_fk' : getLastXPoints('runID_fk', 'nCounts', self.numberOfPoints, 'runID_fk')
-        }
-        self.dataFrame = pd.DataFrame(data)
+        if self.dropDownX1.GetStringSelection() != '' and self.dropDownY1.GetStringSelection() != '' :
+            data = {
+                'x' : getLastXPoints(self.getDropDownSelection()[0], 'ciceroOut', self.numberOfPoints, 'runID'),
+                'y' : getLastXPoints(self.getDropDownSelection()[1], 'nCounts', self.numberOfPoints, 'runID_fk'),
+                'runID_fk' : getLastXPoints('runID_fk', 'nCounts', self.numberOfPoints, 'runID_fk')
+            }
+            self.dataFrame = pd.DataFrame(data)
 
-    def saveDataImage(self, event) :
+    def saveDataImage(self, event) : #eps
         width = 200 
         height = 200
         bmp = wx.Bitmap(width, height)
