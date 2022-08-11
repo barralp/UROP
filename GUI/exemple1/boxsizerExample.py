@@ -44,9 +44,6 @@ class DypoleDatabaseViewer(wx.Frame):
         self.Show()
 
     def checkForNewData(self) :
-        #self.graph1.emptyDataBase()
-        #self.graph2.emptyDataBase()
-        #self.graph3.emptyDataBase()
         while self.checkingData :
             self.graph1.checkForNewData()
             self.graph2.checkForNewData()
@@ -75,13 +72,6 @@ class DypoleDatabaseViewer(wx.Frame):
 
         self.selectionsGrid = grid.Grid(self.basePanel)
         self.selectionsGrid.CreateGrid(9, 7)
-        
-        self.graphDropDown = wx.ComboBox(self.basePanel, choices=['Graph 1', 'Graph 2', 'Graph 3'])
-        #self.dropDownYSelections = wx.ComboBox(self.basePanel, choices=varsY)
-        #self.dropDownXSelections = wx.ComboBox(self.basePanel, choices=varsX)
-        #self.dropDownZSelections = wx.ComboBox(self.basePanel, choices=[])
-        #self.lowZValue = wx.TextCtrl()
-        #self.highZValue = wx.TextCtrl()
 
         self.selectionsGrid.SetColLabelValue(col=0, value='Graph')
         self.selectionsGrid.SetColLabelValue(col=1, value='X')
@@ -90,6 +80,26 @@ class DypoleDatabaseViewer(wx.Frame):
         self.selectionsGrid.SetColLabelValue(col=4, value='Z Min')
         self.selectionsGrid.SetColLabelValue(col=5, value='Z Max')
         self.selectionsGrid.SetColLabelValue(col=6, value='Parameters')
+
+        self.varsX = getVariableList('ciceroOut')
+        self.varsY = getVariableList('nCounts')
+
+        for i in range(0, self.selectionsGrid.GetNumberRows() - 1) :
+            graphDropDown = wx.grid.GridCellChoiceEditor(['Graph 1', 'Graph 2', 'Graph 3'], True) 
+            self.selectionsGrid.SetCellEditor(i, 0, graphDropDown)
+
+            xSelections = wx.grid.GridCellChoiceEditor(self.varsX, True)
+            self.selectionsGrid.SetCellEditor(i, 1, xSelections)
+
+            ySelections = wx.grid.GridCellChoiceEditor(self.varsY, True)
+            self.selectionsGrid.SetCellEditor(i, 2, ySelections)
+        #self.dropDownYSelections = wx.ComboBox(self.basePanel, choices=varsY)
+        #self.dropDownXSelections = wx.ComboBox(self.basePanel, choices=varsX)
+        #self.dropDownZSelections = wx.ComboBox(self.basePanel, choices=[])
+        #self.lowZValue = wx.TextCtrl()
+        #self.highZValue = wx.TextCtrl()
+
+
 
         #self.selectionsGrid.SetRowLabelValue(row=0, value=self.graphDropDown)
 
