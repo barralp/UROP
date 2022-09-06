@@ -31,8 +31,10 @@ class DypoleDatabaseViewer(wx.Frame):
     def __init__(self, parent, title):
         self.app = wx.App()
         wx.Frame.__init__(self, parent, title = title, size = (1000, 500))
+        self.dropDownsFilled = False
         self.start()
-        
+
+    #saves the images for all of the graphs
     def saveGraphImage(self, event) :
         self.graph1.saveDataImage(0)
         self.graph2.saveDataImage(0)
@@ -43,6 +45,10 @@ class DypoleDatabaseViewer(wx.Frame):
         self.Centre()
         self.Show()
 
+    #returns whether or not the dropdowns in a certain row is filled
+    def dropDownsFilled(self, row) :
+        return self.selectionsGrid.GetCellValue(row, 1) and self.selectionsGrid.GetCellValue(row, 2)
+
     def checkForNewData(self) :
         while self.checkingData :
             self.graph1.checkForNewData()
@@ -50,13 +56,51 @@ class DypoleDatabaseViewer(wx.Frame):
             self.graph3.checkForNewData()
             print('checked')
             time.sleep(3)
+    
+    #converts string to a dictionary for use for parameters (like color, shape etc.)
+    def transformDictionary(self, dictionary) : 
+        parsed = eval(dictionary)
+        return parsed
+    
+    #function that is called when the plot function is called: checks to see if graph is indicated in table, then
+    #calls corresponding functions (Other functions check to see if x and y are both filled)
+    def handleGridChanges(self, event) :
+        #stringDict = "{'a' : 1, 'b': 2}"
+        #print(self.transformDictionary(stringDict))
 
+        for col in range (0, self.selectionsGrid.GetNumberCols() - 1) :
+            #print('entered')
+            dropDownX=self.selectionsGrid.GetCellValue(1, col)
+            dropDownY=self.selectionsGrid.GetCellValue(2, col)
+            print("dropdown X" + dropDownX)
+            print("dropdown Y" + dropDownY)
+            if (type(self.transformDictionary(self.selectionsGrid.GetCellValue(4, col))) is dict) :
+                pmtrs = self.transformDictionary(self.selectionsGrid.GetCellValue(4, col))
+            else :
+                pmtrs = {}
+            if self.checkingData == False :
+                if self.selectionsGrid.GetCellValue(0, col) == 'Graph 1':
+                    self.graph1.updateDropDown(dropDownX, dropDownY)
+                elif self.selectionsGrid.GetCellValue(0, col) == 'Graph 2':
+                    self.graph2.updateDropDown(dropDownX, dropDownY)
+                elif self.selectionsGrid.GetCellValue(0, col) == 'Graph 3':
+                    self.graph3.updateDropDown(dropDownX, dropDownY)
+            else :
+                if self.selectionsGrid.GetCellValue(0, col) == 'Graph 1':
+                    self.graph1.updateDropDown(dropDownX, dropDownY)
+                elif self.selectionsGrid.GetCellValue(0, col) == 'Graph 2':
+                    self.graph2.updateDropDown(dropDownX, dropDownY)
+                elif self.selectionsGrid.GetCellValue(0, col) == 'Graph 3':
+                    self.graph3.updateDropDown(dropDownX, dropDownY)
+    
+    #called when the number of points is updated in the textbox  
     def updatePointCount(self, event) :
         if self.numberOfPointsTextBox.GetValue().isdigit() and int(self.numberOfPointsTextBox.GetValue()) > 0 :
             self.graph1.updateNumberOfPoints(self.numberOfPointsTextBox.GetValue())
             self.graph2.updateNumberOfPoints(self.numberOfPointsTextBox.GetValue())
             self.graph3.updateNumberOfPoints(self.numberOfPointsTextBox.GetValue())
 
+    #setup for the user interface
     def InitUI(self):
         self.basePanel = wx.lib.scrolledpanel.ScrolledPanel(self, id = -1, size = (1,1))
         self.basePanel.SetupScrolling()
@@ -93,29 +137,7 @@ class DypoleDatabaseViewer(wx.Frame):
 
             ySelections = wx.grid.GridCellChoiceEditor(self.varsY, True)
             self.selectionsGrid.SetCellEditor(i, 2, ySelections)
-        #self.dropDownYSelections = wx.ComboBox(self.basePanel, choices=varsY)
-        #self.dropDownXSelections = wx.ComboBox(self.basePanel, choices=varsX)
-        #self.dropDownZSelections = wx.ComboBox(self.basePanel, choices=[])
-        #self.lowZValue = wx.TextCtrl()
-        #self.highZValue = wx.TextCtrl()
-
-
-
-        #self.selectionsGrid.SetRowLabelValue(row=0, value=self.graphDropDown)
-
-        self.parameterCollection = []
-
-        #self.gridCol = {
-         #   'Graph' : self.graphDropDown,
-          #  'X' : self.dropDownXSelections,
-           # 'Y' : self.dropDownYSelections,
-            #'Z' : self.dropDownZSelections,
-            #'Z Min' : self.lowZValue,
-            #'Z Max' : self.highZValue,
-            #'Parameters' : ''
-        #}
-        # this should go under the graph label 
-        # each one of the dictionary should go in a different row 
+            #self.selectionsGrid.GetCellValue()
         
         self.graph1 = PlotPanel(self.basePanel)
         self.BoxSizer11.Add(self.graph1)
@@ -138,14 +160,14 @@ class DypoleDatabaseViewer(wx.Frame):
         self.BoxSizer22 = wx.StaticBoxSizer(self.Box22, wx.HORIZONTAL)
         self.TitleBox = wx.StaticBox(self.basePanel, label='Title Box')
 
-        varsX = getVariableList('ciceroOut')
-        varsY = getVariableList('nCounts')
-
         self.updateDataButton = wx.Button(self.basePanel, wx.ID_ANY, 'Check for new data')
         self.updateDataButton.SetBackgroundColour((255, 230, 180, 255))
         self.numberOfPointsTextBox = wx.TextCtrl(self.basePanel)
         self.textForPointCount = wx.StaticText(self.basePanel, label = '# of points to take from database')
         self.updateDataButtonStatus = False
+
+        self.plotButton = wx.Button(self.basePanel, wx.ID_ANY, 'Plot')
+        self.plotButton.Bind(wx.EVT_BUTTON, self.handleGridChanges)
 
         self.numberOfPointsTextBox.Bind(wx.EVT_TEXT, self.updatePointCount)
 
@@ -156,6 +178,7 @@ class DypoleDatabaseViewer(wx.Frame):
         self.BoxSizer22.Add(self.textForPointCount, flag=wx.ALL|wx.EXPAND, border=5)
         self.BoxSizer22.Add(self.numberOfPointsTextBox, flag=wx.ALL|wx.EXPAND, border=5)
         self.BoxSizer22.Add(self.saveImageButton, flag=wx.ALL|wx.EXPAND, border=5)
+        self.BoxSizer22.Add(self.plotButton, flag=wx.ALL|wx.EXPAND, border=5)
         self.BoxSizer22.Add(self.selectionsGrid)
 
         self.updateDataButton.Bind(wx.EVT_BUTTON, self.checkNewData)
@@ -169,6 +192,7 @@ class DypoleDatabaseViewer(wx.Frame):
         self.basePanel.SetSizer(self.mainWindowBoxSizer)
         self.checkingData = False
 
+    #if checking data button is on the second push, this function will run to check to see if there are new points
     def checkNewData(self, event) : # rename variables to make them more clear
         try :
             if not self.updateDataButtonStatus : # case where new data is being taken
@@ -194,14 +218,19 @@ class PlotPanel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         self.initPlotPanel()
+
+    
+    def updateDropDownsFilled(self, row, dropDownsFilled) :
+        self.dropDownsFilled[row] = dropDownsFilled
+    
+    def initPlotPanel(self):
         data = {
             'x' : [],
             'y' : [],
             'runID_fk' : []
         }
         self.dataFrame = pd.DataFrame(data)
-    
-    def initPlotPanel(self):
+        self.dropDownsFilled = [False, False, False, False, False, False, False, False, False]
         self.mainBoxSizer = wx.BoxSizer(wx.VERTICAL)
         
         self.setUpFigure()
@@ -215,9 +244,6 @@ class PlotPanel(wx.Panel):
         self.mainBoxSizer.Add(self.menuBoxSizer)
     
         self.SetSizer(self.mainBoxSizer)
-
-    def dropDownsFilled(self) :
-        return self.getDropDownSelection()[0] != '' and self.getDropDownSelection()[1] != ''
     
     def setUpFigure(self):
         self.figure = matplotlib.figure.Figure(facecolor='white', figsize=(6,4))
@@ -231,37 +257,28 @@ class PlotPanel(wx.Panel):
         self.axes.grid(True, color='gray')
 
     # change update dropdown to use the info from the grid and check to see if there is multiple x and y selected
-    def updateDropDown(self, event) :
+    def updateDropDown(self, dropDownX, dropDownY, zValues=[], parameters=[]) :
         self.axes.cla()
-        dropDownX = self.getDropDownSelection()[0]
-        dropDownY1 = self.getDropDownSelection()[1] 
-        self.axes.set_title(dropDownX + ' vs. ' + dropDownY1) 
+        self.axes.set_title(dropDownX + ' vs. ' + dropDownY) 
         self.axes.set_xlabel(dropDownX)
-        self.axes.set_ylabel(dropDownY1)
-        if (self.dropDownsFilled()) :
-            self.changeVar()
+        self.axes.set_ylabel(dropDownY)
+        if (dropDownX !='' and dropDownY != '') :
+            self.changeVar(dropDownX !='' and dropDownY != '')
             self.axes.plot(self.dataFrame['x'], self.dataFrame['y'], marker ='o', ls='')
             #self.axes.plot(self.dataFrame['x'], self.dataFrame['y'], ls='') call this to make multiple graphs
-        else :
-            self.axes.plot([],[])
+       # else :
+        #    self.axes.plot([],[])
         self.canvas.draw()
+    
+    def changeXVar(self, newValue) :
+        self.xVar = newValue
+    def changeYVar(self, newValue) :
+        self.yVar = newValue
 
-    def graphData(self, graph) :
-        #if (x and y are both selected) :
-            #updateDropDown()  
-        #if (graph)
-        return 0
-
-    def handleGridInput(self) :
-        #if selectedGraph == graph1 :
-                #graphData(graph)
-        #elif selectedGraph == graph2 :
-            #graphData(graph)
-        #elif selectedGraph == graph3 :
-            #graphData(graph)
-        return 0
 
     def setUpMenu(self):
+        self.xVar = ''
+        self.yVar = ''
         self.xBox = wx.StaticBox(self, label='X Parameters')
         self.xBoxSizer = wx.StaticBoxSizer(self.xBox, wx.VERTICAL)
         self.yBox = wx.StaticBox(self, label='Y Parameters')
@@ -269,24 +286,21 @@ class PlotPanel(wx.Panel):
         self.controlsBox = wx.StaticBox(self, label='Controls Box')
         self.controlsBoxSizer = wx.StaticBoxSizer(self.controlsBox, wx.VERTICAL)
 
-        #self.gridBox = wx.StaticBox(self, label='Grid Box')
-        #self.gridBoxSizer = wx.StaticBoxSizer(self.gridBox, wx.VERTICAL)
-
         self.numberOfPoints = 50
         
-        self.textX1 = wx.StaticText(self, label = 'X Variable 1')
-        self.textY1 = wx.StaticText(self, label = 'Y Variable 1')
+        #self.textX1 = wx.StaticText(self, label = 'X Variable')
+        #self.textY1 = wx.StaticText(self, label = 'Y Variable')
     
-        varsX = getVariableList('ciceroOut')
-        varsY = getVariableList('nCounts')
+        #varsX = getVariableList('ciceroOut')
+        #varsY = getVariableList('nCounts')
         relationsX = ['x', 'ln(x)', 'x^2', 'sqrt(x)']
         relationsY = ['y', 'ln(y)', 'y^2', 'sqrt(y)']
         
-        self.dropDownX1 = wx.ComboBox(self, choices = varsX)
-        self.dropDownY1 = wx.ComboBox(self, choices = varsY)
+        #self.dropDownX1 = wx.ComboBox(self, choices = varsX)
+        #self.dropDownY1 = wx.ComboBox(self, choices = varsY)
 
-        self.dropDownX1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
-        self.dropDownY1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
+        #self.dropDownX1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
+        #self.dropDownY1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
 
         self.textXRelations = wx.StaticText(self, label = 'X Transformation')
         self.textYRelations = wx.StaticText(self, label = 'Y Transformation')
@@ -294,8 +308,8 @@ class PlotPanel(wx.Panel):
         self.dropDownXRelations1 = wx.ComboBox(self, choices = relationsX)
         self.dropDownYRelations1 = wx.ComboBox(self, choices = relationsY)
         
-        self.dropDownXRelations1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
-        self.dropDownYRelations1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
+        #self.dropDownXRelations1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
+        #self.dropDownYRelations1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
 
         self.copyGraphData = wx.Button(self, wx.ID_ANY, 'Copy Graph Data')
         self.saveGraphImage = wx.Button(self, wx.ID_ANY, 'Save Graph Image')
@@ -303,13 +317,13 @@ class PlotPanel(wx.Panel):
         self.copyGraphData.Bind(wx.EVT_BUTTON, self.copyData)
         self.saveGraphImage.Bind(wx.EVT_BUTTON, self.saveDataImage)
         
-        self.xBoxSizer.Add(self.textX1)
-        self.xBoxSizer.Add(self.dropDownX1)
+        #self.xBoxSizer.Add(self.textX1)
+        #self.xBoxSizer.Add(self.dropDownX1)
 
         self.xBoxSizer.Add(self.textXRelations)
         self.xBoxSizer.Add(self.dropDownXRelations1)
-        self.yBoxSizer.Add(self.textY1)
-        self.yBoxSizer.Add(self.dropDownY1)
+        #self.yBoxSizer.Add(self.textY1)
+        #self.yBoxSizer.Add(self.dropDownY1)
         self.yBoxSizer.Add(self.textYRelations)
         self.yBoxSizer.Add(self.dropDownYRelations1)
 
@@ -320,7 +334,7 @@ class PlotPanel(wx.Panel):
         self.menuBoxSizer.Add(self.yBoxSizer)
         self.menuBoxSizer.Add(self.controlsBoxSizer)
 
-        self.updateDropDown(0)
+        self.updateDropDown('', '')
 
 
     def copyData(self, event) :
@@ -336,15 +350,15 @@ class PlotPanel(wx.Panel):
         dropDownY1 = self.dropDownY1.GetStringSelection()
         return [dropDownX1, dropDownY1]
 
-    def makeSecondPlot(self) :
-        if (self.secondPlotCheckbox.GetValue() != '' and self.dropDownsFilled()) :
+    def makeSecondPlot(self, dropDownsFilled) :
+        if (self.secondPlotCheckbox.GetValue() != '' and dropDownsFilled) :
             make = 0 
 
         return 0
 
     # This will be the function that is used to check to see if there is new data in the database and adds it
-    def checkForNewData(self) :
-        if self.dropDownsFilled() and len(self.dataFrame) != 0 :
+    def checkForNewData(self, dropDownsFilled) :
+        if dropDownsFilled and len(self.dataFrame) != 0 :
             #print(self.dataFrame)
             lastRunID_fk = self.dataFrame['runID_fk'].iloc[-1]
             lastRunID_fk_dataBase = getLastXPoints('runID_fk', 'nCounts', 1, 'runID_fk')[0]
@@ -353,12 +367,13 @@ class PlotPanel(wx.Panel):
                 varY = getLastXPoints(self.getDropDownSelection()[1], 'nCounts', 1, 'runID_fk')
                 lastRunID_fk = getLastXPoints('runID_fk', 'nCounts', 1, 'runID_fk')
                 self.dataFrame.append({'x' : varX, 'y' : varY, 'runID_fk' : lastRunID_fk}, ignore_index=True)
-        elif self.dropDownsFilled() and len(self.dataFrame) == 0 :
+        elif dropDownsFilled and len(self.dataFrame) == 0 :
             varX = getLastXPoints(self.getDropDownSelection()[0], 'ciceroOut', 1, 'runID')
             varY = getLastXPoints(self.getDropDownSelection()[1], 'nCounts', 1, 'runID_fk')
             lastRunID_fk = getLastXPoints('runID_fk', 'nCounts', 1, 'runID_fk')
 
-    def saveDataImage(self, event) : #eps
+    #saves the graph image as a bmp file for later viewing 
+    def saveDataImage(self, event, dropDownsFilled) : #eps
         width = 200 
         height = 200
         bmp = wx.Bitmap(width, height)
@@ -366,17 +381,17 @@ class PlotPanel(wx.Panel):
         dc.SelectObject(bmp)
         today = date.today()
         dateOfGraph = today.strftime("%Y-%b-%d")
-        if self.dropDownsFilled() :
+        if dropDownsFilled :
             imageName = dateOfGraph + " " + self.dropDownX1.GetStringSelection() + " vs. " + self.dropDownY1.GetStringSelection()
             bmp.SaveFile(imageName, wx.BITMAP_TYPE_PNG)
 
     # This function will eventually use the number of data points to only get the last couple entries 
-    def changeVar(self) :
-        if (self.dropDownsFilled()) :
+    def changeVar(self, dropDownsFilled) :
+        if (dropDownsFilled) :
             self.dataFrame.drop(columns=['x', 'y'], inplace=True)
             data = {
-                'x' : getLastXPoints(self.getDropDownSelection()[0], 'ciceroOut', self.numberOfPoints, 'runID'),
-                'y' : getLastXPoints(self.getDropDownSelection()[1], 'nCounts', self.numberOfPoints, 'runID_fk'),
+                'x' : getLastXPoints(self.xVar, 'ciceroOut', self.numberOfPoints, 'runID'),
+                'y' : getLastXPoints(self.yVar, 'nCounts', self.numberOfPoints, 'runID_fk'),
                 'y1' : getLastXPoints(self.getDropDownSelection()[1], 'nCounts', self.numberOfPoints, 'runID_fk'),
                 'runID_fk' : getLastXPoints('runID_fk', 'nCounts', self.numberOfPoints, 'runID_fk')
             }
@@ -405,4 +420,3 @@ class PlotPanel(wx.Panel):
 if __name__ == '__main__':
     ui = DypoleDatabaseViewer(None, title='Database viewer')
     ui.app.MainLoop()
-
