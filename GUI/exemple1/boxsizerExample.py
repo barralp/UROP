@@ -3,9 +3,9 @@ from xml.etree.ElementTree import tostring
 from sqlalchemy import column
 from wx.core import EVT_CHECKBOX
 
+import sys
 sys.path.insert(0, '../../database')
 import os
-import sys
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(sys.path[0])),'database')) # goes 2 level up
 from communicate_database import getVariableList, getLastImageID, getLastXPoints
 
@@ -140,7 +140,7 @@ class DypoleDatabaseViewer(wx.Frame):
         self.BoxSizer12 = wx.StaticBoxSizer(self.Box12, wx.HORIZONTAL)
 
         self.selectionsGrid = grid.Grid(self.basePanel)
-        self.selectionsGrid.CreateGrid(9, 7)
+        self.selectionsGrid.CreateGrid(9, 5)
 
         self.graph1DataList = {}
         self.graph2DataList = {}
@@ -150,9 +150,8 @@ class DypoleDatabaseViewer(wx.Frame):
         self.selectionsGrid.SetColLabelValue(col=1, value='X')
         self.selectionsGrid.SetColLabelValue(col=2, value='Y')
         self.selectionsGrid.SetColLabelValue(col=3, value='Z')
-        self.selectionsGrid.SetColLabelValue(col=4, value='Z Min')
-        self.selectionsGrid.SetColLabelValue(col=5, value='Z Max')
-        self.selectionsGrid.SetColLabelValue(col=6, value='Parameters')
+        #Z is dictionary with range & identifier 
+        self.selectionsGrid.SetColLabelValue(col=4, value='Parameters')
 
         self.varsX = getVariableList('ciceroOut')
         self.varsY = getVariableList('nCounts')
