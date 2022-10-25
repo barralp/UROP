@@ -1,4 +1,5 @@
 from re import X
+from xml.etree.ElementTree import tostring
 from sqlalchemy import column
 from wx.core import EVT_CHECKBOX
 
@@ -51,7 +52,7 @@ class DypoleDatabaseViewer(wx.Frame):
 
     def checkForNewData(self) :
         while self.checkingData :
-            for row in range (0, self.selectionsGrid.GetNumberRows() - 1)
+            for row in range (0, self.selectionsGrid.GetNumberRows() - 1) :
                 self.graph1.checkForNewData()
                 self.graph2.checkForNewData()
                 self.graph3.checkForNewData()
@@ -67,32 +68,55 @@ class DypoleDatabaseViewer(wx.Frame):
     #calls corresponding functions (Other functions check to see if x and y are both filled)
     def handleGridChanges(self, event) :
         #stringDict = "{'a' : 1, 'b': 2}"
-        #print(self.transformDictionary(stringDict))
-
+        #print(self.transformDictionary(stringDict))+
+        self.graph1DataList.clear()
+        self.graph2DataList.clear()
+        self.graph3DataList.clear()
         for row in range (0, self.selectionsGrid.GetNumberRows() - 1) :
-            #print('entered')
-            dropDownX=self.selectionsGrid.GetCellValue(row, 1)
-            dropDownY=self.selectionsGrid.GetCellValue(row, 2)
-            print("dropdown X" + dropDownX)
-            print("dropdown Y" + dropDownY)
-            #if (type(self.transformDictionary(self.selectionsGrid.GetCellValue(row, 4))) is dict) :
-             #   pmtrs = self.transformDictionary(self.selectionsGrid.GetCellValue(row, 4))
-            #else :
-             #   pmtrs = {}
+            if self.selectionsGrid.GetCellValue(row, 0) == 'Graph 1':
+                if len(self.graph1DataList) == 0 :
+                    self.graph1DataList['x'] = self.selectionsGrid.GetCellValue(row, 1)
+                    self.graph1DataList['z'] = self.selectionsGrid.GetCellValue(row, 3)
+                    self.graph1DataList['y'] = self.selectionsGrid.GetCellValue(row, 2)
+                else :
+                    if self.graph1DataList['x'] == self.selectionsGrid.GetCellValue(row, 1) :
+                        self.graph1DataList[temp] = self.selectionsGrid.GetCellValue(row, 2)
+            elif self.selectionsGrid.GetCellValue(row, 0) == 'Graph 2':
+                if len(self.graph1DataList) == 0 :
+                    self.graph2DataList['x'] = self.selectionsGrid.GetCellValue(row, 1)
+                    self.graph1DataList['z'] = self.selectionsGrid.GetCellValue(row, 3)
+                    self.graph2DataList['y'] = self.selectionsGrid.GetCellValue(row, 2)
+                else :
+                    if self.graph1DataList['x'] == self.selectionsGrid.GetCellValue(row, 1) :
+                        self.graph2DataList[temp] = self.selectionsGrid.GetCellValue(row, 2)
+            elif self.selectionsGrid.GetCellValue(row, 0) == 'Graph 3':
+                if len(self.graph1DataList) == 0 :
+                    self.graph3DataList['x'] = self.selectionsGrid.GetCellValue(row, 1)
+                    self.graph1DataList['z'] = self.selectionsGrid.GetCellValue(row, 3)
+                    self.graph3DataList['y'] = self.selectionsGrid.GetCellValue(row, 2)
+                else :
+                    if self.graph1DataList['x'] == self.selectionsGrid.GetCellValue(row, 1) :
+                        temp = 'y' + tostring(len(self.graph3DataList) - 1)
+                        self.graph3DataList[temp] = self.selectionsGrid.GetCellValue(row, 2)
+        print(self.graph1DataList)
+        print(self.graph2DataList)
+        print(self.graph3DataList)
+        for row in range (0, self.selectionsGrid.GetNumberRows() - 1) :
+            parameters=self.selectionsGrid.GetCellValue(row, 6)
             if self.checkingData == False :
                 if self.selectionsGrid.GetCellValue(row, 0) == 'Graph 1':
-                    self.graph1.updateDropDown(dropDownX, dropDownY)
+                    self.graph1.updateDropDown(self.graph1DataList)
                 elif self.selectionsGrid.GetCellValue(row, 0) == 'Graph 2':
-                    self.graph2.updateDropDown(dropDownX, dropDownY)
+                    self.graph2.updateDropDown(self.graph2DataList)
                 elif self.selectionsGrid.GetCellValue(row, 0) == 'Graph 3':
-                    self.graph3.updateDropDown(dropDownX, dropDownY)
+                    self.graph3.updateDropDown(self.graph3DataList)
             else :
                 if self.selectionsGrid.GetCellValue(row, 0) == 'Graph 1':
-                    self.graph1.updateDropDown(dropDownX, dropDownY)
+                    self.graph1.updateDropDown(self.graph1DataList)
                 elif self.selectionsGrid.GetCellValue(row, 0) == 'Graph 2':
-                    self.graph2.updateDropDown(dropDownX, dropDownY)
+                    self.graph2.updateDropDown(self.graph2DataList)
                 elif self.selectionsGrid.GetCellValue(row, 0) == 'Graph 3':
-                    self.graph3.updateDropDown(dropDownX, dropDownY)
+                    self.graph3.updateDropDown(self.graph3DataList)
     
     #called when the number of points is updated in the textbox  
     def updatePointCount(self, event) :
@@ -117,6 +141,10 @@ class DypoleDatabaseViewer(wx.Frame):
 
         self.selectionsGrid = grid.Grid(self.basePanel)
         self.selectionsGrid.CreateGrid(9, 7)
+
+        self.graph1DataList = {}
+        self.graph2DataList = {}
+        self.graph3DataList = {}
 
         self.selectionsGrid.SetColLabelValue(col=0, value='Graph')
         self.selectionsGrid.SetColLabelValue(col=1, value='X')
@@ -224,7 +252,7 @@ class PlotPanel(wx.Panel):
         self.dropDownsFilled[row] = dropDownsFilled
     
     def initPlotPanel(self):
-        self.graph
+        #self.graph
         data = {
             'x' : [],
             'y' : [],
@@ -285,19 +313,8 @@ class PlotPanel(wx.Panel):
 
         self.numberOfPoints = 50
         
-        #self.textX1 = wx.StaticText(self, label = 'X Variable')
-        #self.textY1 = wx.StaticText(self, label = 'Y Variable')
-    
-        #varsX = getVariableList('ciceroOut')
-        #varsY = getVariableList('nCounts')
         relationsX = ['x', 'ln(x)', 'x^2', 'sqrt(x)']
         relationsY = ['y', 'ln(y)', 'y^2', 'sqrt(y)']
-        
-        #self.dropDownX1 = wx.ComboBox(self, choices = varsX)
-        #self.dropDownY1 = wx.ComboBox(self, choices = varsY)
-
-        #self.dropDownX1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
-        #self.dropDownY1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
 
         self.textXRelations = wx.StaticText(self, label = 'X Transformation')
         self.textYRelations = wx.StaticText(self, label = 'Y Transformation')
@@ -313,14 +330,9 @@ class PlotPanel(wx.Panel):
 
         self.copyGraphData.Bind(wx.EVT_BUTTON, self.copyData)
         self.saveGraphImage.Bind(wx.EVT_BUTTON, self.saveDataImage)
-        
-        #self.xBoxSizer.Add(self.textX1)
-        #self.xBoxSizer.Add(self.dropDownX1)
 
         self.xBoxSizer.Add(self.textXRelations)
         self.xBoxSizer.Add(self.dropDownXRelations1)
-        #self.yBoxSizer.Add(self.textY1)
-        #self.yBoxSizer.Add(self.dropDownY1)
         self.yBoxSizer.Add(self.textYRelations)
         self.yBoxSizer.Add(self.dropDownYRelations1)
 
@@ -350,7 +362,6 @@ class PlotPanel(wx.Panel):
     # This will be the function that is used to check to see if there is new data in the database and adds it
     def checkForNewData(self, dropDownsFilled, dropDownX, dropDownY) :
         if dropDownsFilled and len(self.dataFrame) != 0 :
-            #print(self.dataFrame)
             lastRunID_fk = self.dataFrame['runID_fk'].iloc[-1]
             lastRunID_fk_dataBase = getLastXPoints('runID_fk', 'nCounts', 1, 'runID_fk')[0]
             if lastRunID_fk != lastRunID_fk_dataBase :
