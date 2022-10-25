@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import socket
 import re
+import platform
 
 MYSQLserverIP = "192.168.1.133"
 username = "root"
@@ -32,7 +33,11 @@ def setConnection(typeOfConnection = 'local'):
 
 def setLocalConnection():
     # Open database connection
-    if (socket.gethostname() == 'MacBook-Pro-de-Pierre-3.local'):
+#    if (socket.gethostname() == 'MacBook-Pro-de-Pierre-3.local'):
+#        mydb = mysql.connector.connection.MySQLConnection(host =
+#        'localhost', user = 'student', password = 'w0lfg4ng',
+#        database = 'imagesdypoledatabase')
+    if (platform.system() == 'Darwin'):
         mydb = mysql.connector.connection.MySQLConnection(host =
         'localhost', user = 'student', password = 'w0lfg4ng',
         database = 'imagesdypoledatabase')
