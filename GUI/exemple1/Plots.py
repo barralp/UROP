@@ -35,6 +35,50 @@ class DypoleDatabaseViewer(wx.Frame):
         self.dropDownsFilled = False
         self.start()
 
+    def fillSpreadSheet(self) :
+        graphs =[]
+        x = []
+        y = []
+        imageID = []
+        z = []
+        parameters = []
+        for row in range (0, self.selectionsGrid.GetNumberRows() - 1) :
+            if (self.selectionsGrid.GetCellValue(row, 0) != '') : 
+                graphs.append(self.selectionsGrid.GetCellValue(row, 0))
+            else :
+                graphs.append('')
+            if (self.selectionsGrid.GetCellValue(row, 0) != '') :
+                x.append(self.selectionsGrid.GetCellValue(row, 1))
+            else :
+                x.append('')
+            if (self.selectionsGrid.GetCellValue(row, 0) != '') :
+                y.append(self.selectionsGrid.GetCellValue(row, 2))
+            else :
+                y.append('')
+            if (self.selectionsGrid.GetCellValue(row, 0) != '') :
+                imageID.append(self.selectionsGrid.GetCellValue(row, 3))
+            else :
+                imageID.append('')
+            if (self.selectionsGrid.GetCellValue(row, 0) != '') :
+                z.append(self.selectionsGrid.GetCellValue(row, 4))
+            else :
+                z.append('')
+            if (self.selectionsGrid.GetCellValue(row, 0) != '') :
+                parameters.append(self.selectionsGrid.GetCellValue(row, 5))
+            else :
+                parameters.append('')
+        data = {
+            'graphs' : graphs,
+            'x' : x,
+            'y' : y,
+            'ImageID': imageID,
+            'z' : z,
+            'Parameters' : parameters
+
+        }
+        print(data)
+        self.dataFrameSheet = pd.DataFrame(data)
+        print(self.dataFrameSheet)
     #saves the images for all of the graphs
     def saveGraphImage(self, event) :
         self.graph1.saveDataImage(0)
@@ -72,6 +116,7 @@ class DypoleDatabaseViewer(wx.Frame):
         self.graph1DataList.clear()
         self.graph2DataList.clear()
         self.graph3DataList.clear()
+        self.fillSpreadSheet()
         for row in range (0, self.selectionsGrid.GetNumberRows() - 1) :
             if self.selectionsGrid.GetCellValue(row, 0) == 'Graph 1':
                 if len(self.graph1DataList) == 0 :
@@ -102,21 +147,24 @@ class DypoleDatabaseViewer(wx.Frame):
         print(self.graph2DataList)
         print(self.graph3DataList)
         for row in range (0, self.selectionsGrid.GetNumberRows() - 1) :
-            parameters=self.selectionsGrid.GetCellValue(row, 6)
-            if self.checkingData == False :
-                if self.selectionsGrid.GetCellValue(row, 0) == 'Graph 1':
-                    self.graph1.updateDropDown(self.graph1DataList)
-                elif self.selectionsGrid.GetCellValue(row, 0) == 'Graph 2':
-                    self.graph2.updateDropDown(self.graph2DataList)
-                elif self.selectionsGrid.GetCellValue(row, 0) == 'Graph 3':
-                    self.graph3.updateDropDown(self.graph3DataList)
+            if self.selectionsGrid.GetCellValue(row, 5) != '' :
+                parameters=self.selectionsGrid.GetCellValue(row, 5)
             else :
-                if self.selectionsGrid.GetCellValue(row, 0) == 'Graph 1':
-                    self.graph1.updateDropDown(self.graph1DataList)
-                elif self.selectionsGrid.GetCellValue(row, 0) == 'Graph 2':
-                    self.graph2.updateDropDown(self.graph2DataList)
-                elif self.selectionsGrid.GetCellValue(row, 0) == 'Graph 3':
-                    self.graph3.updateDropDown(self.graph3DataList)
+                parameters={}
+            #if self.checkingData == False :
+             #   if self.selectionsGrid.GetCellValue(row, 0) == 'Graph 1':
+              #      self.graph1.updateDropDown(self.graph1DataList)
+               # elif self.selectionsGrid.GetCellValue(row, 0) == 'Graph 2':
+                #    self.graph2.updateDropDown(self.graph2DataList)
+        #        elif self.selectionsGrid.GetCellValue(row, 0) == 'Graph 3':
+         #           self.graph3.updateDropDown(self.graph3DataList)
+          #  else :
+           #     if self.selectionsGrid.GetCellValue(row, 0) == 'Graph 1':
+            #        self.graph1.updateDropDown(self.graph1DataList)
+             #   elif self.selectionsGrid.GetCellValue(row, 0) == 'Graph 2':
+              #      self.graph2.updateDropDown(self.graph2DataList)
+               # elif self.selectionsGrid.GetCellValue(row, 0) == 'Graph 3':
+                #    self.graph3.updateDropDown(self.graph3DataList)
     
     #called when the number of points is updated in the textbox  
     def updatePointCount(self, event) :
@@ -189,12 +237,13 @@ class DypoleDatabaseViewer(wx.Frame):
         self.BoxSizer22 = wx.StaticBoxSizer(self.Box22, wx.HORIZONTAL)
         self.TitleBox = wx.StaticBox(self.basePanel, label='Title Box')
 
-        self.updateDataButton = wx.Button(self.basePanel, wx.ID_ANY, 'Check for new data')
+        self.updateDataButton = wx.Button(self.basePanel, wx.ID_ANY, 'Looking for change')
         self.updateDataButton.SetBackgroundColour((255, 230, 180, 255))
         self.numberOfPointsTextBox = wx.TextCtrl(self.basePanel)
-        self.textForPointCount = wx.StaticText(self.basePanel, label = '# of points to take from database')
+        self.textForPointCount = wx.StaticText(self.basePanel, label = '# of points: ')
         self.updateDataButtonStatus = False
 
+        #self.pullFromSpreadSheet = wx.Button(self.basePanel, wx.ID_ANY, 'Pull From Spreadsheet')
         self.plotButton = wx.Button(self.basePanel, wx.ID_ANY, 'Plot')
         self.plotButton.Bind(wx.EVT_BUTTON, self.handleGridChanges)
 
@@ -203,11 +252,12 @@ class DypoleDatabaseViewer(wx.Frame):
         self.saveImageButton = wx.Button(self.basePanel, wx.ID_ANY, 'Save All Graph Images')
         self.saveImageButton.Bind(wx.EVT_BUTTON, self.saveGraphImage)
 
-        self.BoxSizer22.Add(self.updateDataButton, flag=wx.ALL|wx.EXPAND, border=5)
-        self.BoxSizer22.Add(self.textForPointCount, flag=wx.ALL|wx.EXPAND, border=5)
-        self.BoxSizer22.Add(self.numberOfPointsTextBox, flag=wx.ALL|wx.EXPAND, border=5)
-        self.BoxSizer22.Add(self.saveImageButton, flag=wx.ALL|wx.EXPAND, border=5)
-        self.BoxSizer22.Add(self.plotButton, flag=wx.ALL|wx.EXPAND, border=5)
+        self.BoxSizer22.Add(self.updateDataButton)
+        self.BoxSizer22.Add(self.textForPointCount)
+        self.BoxSizer22.Add(self.numberOfPointsTextBox)
+        self.BoxSizer22.Add(self.saveImageButton)
+        self.BoxSizer22.Add(self.plotButton)
+        #self.BoxSizer22.Add(self.pullFromSpreadSheet)
         self.BoxSizer22.Add(self.selectionsGrid)
 
         self.updateDataButton.Bind(wx.EVT_BUTTON, self.checkNewData)
@@ -243,6 +293,8 @@ class DypoleDatabaseViewer(wx.Frame):
             self.checkNewData(0)
         time.sleep(2)
 
+
+
 class PlotPanel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
@@ -250,8 +302,8 @@ class PlotPanel(wx.Panel):
     
     def updateDropDownsFilled(self, row, dropDownsFilled) :
         self.dropDownsFilled[row] = dropDownsFilled
-    
-    def initPlotPanel(self):
+
+    def initPlotPanel(self) :
         #self.graph
         data = {
             'x' : [],
@@ -322,9 +374,6 @@ class PlotPanel(wx.Panel):
         self.dropDownXRelations1 = wx.ComboBox(self, choices = relationsX)
         self.dropDownYRelations1 = wx.ComboBox(self, choices = relationsY)
         
-        #self.dropDownXRelations1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
-        #self.dropDownYRelations1.Bind(wx.EVT_COMBOBOX, self.updateDropDown)
-
         self.copyGraphData = wx.Button(self, wx.ID_ANY, 'Copy Graph Data')
         self.saveGraphImage = wx.Button(self, wx.ID_ANY, 'Save Graph Image')
 
